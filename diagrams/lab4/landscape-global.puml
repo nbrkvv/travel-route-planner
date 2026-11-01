@@ -1,0 +1,24 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Context.puml
+title L0 Общая интеграция платформы
+Enterprise_Boundary(operator, "ИТ контур оператора туристической платформы") {
+ System(travel, "Travel Route Planner", "Персональные маршруты путешествий")
+ System_Ext(crm, "CRM оператора", "Поддержка путешественников и обращения")
+ System_Ext(idp, "Корпоративный IAM", "SSO и идентификация пользователей")
+}
+Enterprise_Boundary(external, "Внешние организации") {
+ System_Ext(payment_gateway, "Платежный провайдер", "Проектируемая оплата подписки")
+ System_Ext(maps, "Картографический сервис", "Матрица движения и геометрия")
+ System_Ext(weather, "Сервис погоды", "Прогноз")
+ System_Ext(open_data, "Туристический портал", "Открытый каталог мест")
+}
+Rel(travel, crm, "Создает обращение по запросу пользователя; передает ID маршрута", "HTTPS / REST / JSON")
+Rel(travel, idp, "Вход и получение ключей проверки токенов", "HTTPS / OIDC / OAuth 2.0")
+Rel(travel, payment_gateway, "Создает оплату подписки, без карточных данных", "HTTPS / REST / JSON")
+Rel(payment_gateway, travel, "Подписанное уведомление об оплате; event_id", "HTTPS / webhook / HMAC")
+Rel(travel, maps, "Координаты и транспорт; матрица и путь", "HTTPS / REST / JSON")
+Rel(travel, weather, "Координаты и даты; прогноз", "HTTPS / REST / JSON")
+Rel(travel, open_data, "Импорт карточек для редакторской проверки", "HTTPS / REST / JSON")
+@enduml

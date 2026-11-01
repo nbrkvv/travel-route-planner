@@ -1,0 +1,26 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Container.puml
+title Сквозной сценарий построения маршрута
+Container(web_app, "Веб-приложение", "React", "Параметры и карта")
+Container(route_catalog_service, "Сервис маршрутов и каталога", "FastAPI", "Оркестрация и RoutePlanner")
+Container(auth_service, "Сервис авторизации", "FastAPI", "Principal и разрешения")
+Container(recommendation_service, "Сервис рекомендаций", "Python", "Ранжирование")
+ContainerDb(database, "Операционная БД", "PostgreSQL / PostGIS", "Каталог и маршруты")
+System_Ext(maps_service, "Карты", "Матрица и геометрия")
+System_Ext(weather_service, "Погода", "Прогноз")
+Rel(web_app, route_catalog_service, "1 POST /api/v1/routes: токен и параметры", "HTTPS 443 / JSON")
+Rel(route_catalog_service, auth_service, "2 Проверяет токен и routes:create; Principal", "HTTPS 8443 / JSON")
+Rel(route_catalog_service, database, "3 Читает опубликованные места", "PostgreSQL 5432 / TLS")
+Rel(route_catalog_service, recommendation_service, "4 Кандидаты и интересы; RankedPlace", "HTTPS 8443 / JSON")
+Rel(route_catalog_service, maps_service, "5 Точки и транспорт; TravelMatrix", "HTTPS 443 / JSON")
+Rel(route_catalog_service, weather_service, "6 Координаты и даты; прогноз или предупреждение", "HTTPS 443 / JSON")
+Rel(route_catalog_service, maps_service, "8 Геометрия выбранного пути и уточненные длительности", "HTTPS 443 / JSON")
+Rel(route_catalog_service, database, "10 Транзакция: маршрут и аудит; COMMIT", "PostgreSQL 5432 / TLS")
+Rel(route_catalog_service, web_app, "11 HTTP 201 и RouteDTO после COMMIT", "HTTPS 443 / JSON")
+note right of route_catalog_service
+7 Python Call: RoutePlanner.plan
+9 Python Call: проверка уточненного времени
+end note
+@enduml

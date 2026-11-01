@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Component.puml
+title Локальная динамика backend
+Container(web_app, "Веб-приложение", "React", "Параметры и карта")
+Container_Boundary(route_catalog_service, "Backend процесс") {
+Component(api_comp, "API", "FastAPI", "Валидация запроса")
+Component(route_comp, "Прикладной сервис маршрутов", "Python", "Оркестрация")
+Component(planner, "RoutePlanner", "Python", "Локальный компонент ЛР3")
+}
+Container(auth_service, "Сервис авторизации", "FastAPI", "Principal и разрешения")
+Container(recommendation_service, "Сервис рекомендаций", "Python", "Ранжирование")
+ContainerDb(database, "Операционная БД", "PostgreSQL / PostGIS", "Каталог и маршруты")
+System_Ext(maps_service, "Карты", "Матрица и геометрия")
+System_Ext(weather_service, "Погода", "Прогноз")
+Rel(web_app, api_comp, "1 POST /api/v1/routes: токен и параметры", "HTTPS 443 / JSON")
+Rel(route_comp, auth_service, "3 Проверяет токен и routes:create; Principal", "HTTPS 8443 / JSON")
+Rel(route_comp, database, "4 Читает опубликованные места", "PostgreSQL 5432 / TLS")
+Rel(route_comp, recommendation_service, "5 Кандидаты и интересы; RankedPlace", "HTTPS 8443 / JSON")
+Rel(route_comp, maps_service, "6 Точки и транспорт; TravelMatrix", "HTTPS 443 / JSON")
+Rel(route_comp, weather_service, "7 Координаты и даты; прогноз или предупреждение", "HTTPS 443 / JSON")
+Rel(route_comp, planner, "8 RoutePlanner.plan(candidates, preferences, matrix); проверка ограничений", "Python Call")
+Rel(route_comp, maps_service, "9 Геометрия выбранного пути и уточненные длительности", "HTTPS 443 / JSON")
+Rel(route_comp, planner, "10 Повторная проверка итогового времени", "Python Call")
+Rel(route_comp, database, "11 Транзакция: маршрут и аудит; COMMIT", "PostgreSQL 5432 / TLS")
+Rel(api_comp, web_app, "12 HTTP 201 и RouteDTO после COMMIT", "HTTPS 443 / JSON")
+Rel(api_comp, route_comp, "2 create_route: запрос и контекст доступа", "Python Call")
+@enduml

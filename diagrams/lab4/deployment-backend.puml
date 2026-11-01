@@ -1,0 +1,51 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Deployment.puml
+title Развертывание backend и его зависимостей
+Deployment_Node(client, "Устройство пользователя", "Desktop / Android / iOS") {
+ Deployment_Node(browser, "Браузер", "JavaScript runtime") {
+ Container(web_app, "Web UI", "React", "Статические ресурсы")
+ }
+ Container(mobile_app, "Mobile UI", "React Native / Expo", "Мобильная ОС")
+}
+Deployment_Node(cloud, "Приватное облако оператора", "VPC") {
+ Deployment_Node(edge, "Публичная подсеть", "Linux VM") {
+ Container(proxy, "Reverse proxy", "Nginx", "TLS termination; health checks; upstream API A/B")
+ }
+ Deployment_Node(app_a, "Узел приложений A", "Linux / Docker") {
+ Container(api_a, "Backend A", "FastAPI / Uvicorn", "Сервис маршрутов и каталога")
+ Container(auth_service, "Авторизация", "FastAPI", "Проверка токенов")
+ }
+ Deployment_Node(app_b, "Узел приложений B", "Linux / Docker") {
+ Container(api_b, "Backend B", "FastAPI / Uvicorn", "Вторая реплика того же контейнера")
+ Container(recommendation_service, "Рекомендации", "Python / FastAPI", "Inference")
+ 
+ }
+ Deployment_Node(data, "Подсеть данных", "Изолированный сегмент") {
+ ContainerDb(database, "Primary", "PostgreSQL / PostGIS", "Запись и чтение актуальных данных")
+ ContainerDb(replica, "Standby", "PostgreSQL / PostGIS", "Асинхронная реплика; ручное переключение")
+ 
+ }
+}
+System_Ext(external_apis, "Внешние API", "Карты, погода, IAM, каталог, CRM, платежи")
+Rel(web_app, proxy, "API и статика", "HTTPS / TCP 443 / TLS 1.2+")
+Rel(mobile_app, proxy, "API", "HTTPS / TCP 443 / TLS 1.2+")
+Rel(proxy, api_a, "Балансировка и /health", "HTTPS / TCP 8443 / TLS")
+Rel(proxy, api_b, "Балансировка и /health", "HTTPS / TCP 8443 / TLS")
+Rel(api_a, database, "Каталог, маршруты, аудит", "PostgreSQL / TCP 5432 / TLS verify-full")
+Rel(api_b, database, "Каталог, маршруты, аудит", "PostgreSQL / TCP 5432 / TLS verify-full")
+Rel(auth_service, database, "Профили и роли", "TCP 5432 / TLS")
+Rel(database, replica, "Streaming replication", "TCP 5432 / TLS")
+Rel(api_a, auth_service, "Principal", "HTTPS / TCP 8443 / TLS")
+Rel(api_b, auth_service, "Principal", "HTTPS / TCP 8443 / TLS")
+Rel(api_a, recommendation_service, "Ранжирование", "HTTPS / TCP 8443 / TLS")
+Rel(api_b, recommendation_service, "Ранжирование", "HTTPS / TCP 8443 / TLS")
+
+
+
+
+Rel(auth_service, external_apis, "OIDC / JWKS", "HTTPS / TCP 443 / TLS")
+Rel(api_a, external_apis, "Запросы адаптеров", "HTTPS / TCP 443 / TLS")
+Rel(api_b, external_apis, "Запросы адаптеров", "HTTPS / TCP 443 / TLS")
+@enduml
