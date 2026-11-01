@@ -1,0 +1,71 @@
+@startuml
+title Route Planner UML по реализации ЛР3
+class NoFeasibleRoute {
+}
+class Place {
+  id : str
+  name : str
+  visit_minutes : int
+  cost : Decimal | None
+  opens : int | None
+  closes : int | None
+}
+class RankedPlace {
+  place : Place
+  score : float
+}
+class TripPreferences {
+  start_id : str
+  end_id : str
+  start_minute : int
+  end_minute : int
+  budget : Decimal
+  required_ids : frozenset[str]
+}
+class TravelMatrix {
+  minutes : Mapping[tuple[str, str], int | None]
+  duration(source, target)
+}
+class RouteStop {
+  place : Place
+  arrival : int
+  visit_start : int
+  departure : int
+}
+class RoutePlan {
+  stops : tuple[RouteStop, ...]
+  finish_minute : int
+  total_cost : Decimal
+  total_score : float
+}
+interface RoutePlanningStrategy {
+  order(candidates, current_id, matrix)
+}
+class NearestNextStrategy {
+  order(candidates, current_id, matrix)
+}
+class PreferenceFirstStrategy {
+  order(candidates, current_id, matrix)
+}
+class RouteConstraints {
+  validate(candidates, preferences, matrix)
+  extend(item, current_id, now, spent, preferences, matrix)
+  verify(plan, candidates, preferences, matrix)
+}
+class RoutePlanner {
+  __init__(strategy, constraints)
+  set_strategy(strategy)
+  plan(candidates, preferences, matrix)
+}
+RoutePlanner --> RoutePlanningStrategy
+RoutePlanner --> RouteConstraints
+NearestNextStrategy ..|> RoutePlanningStrategy
+PreferenceFirstStrategy ..|> RoutePlanningStrategy
+RankedPlace --> Place
+RouteStop --> Place
+RoutePlan --> RouteStop
+RoutePlanner ..> RoutePlan
+RoutePlanner ..> TripPreferences
+RoutePlanner ..> TravelMatrix
+RouteConstraints ..> NoFeasibleRoute
+@enduml

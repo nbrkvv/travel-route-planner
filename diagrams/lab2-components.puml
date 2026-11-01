@@ -1,0 +1,42 @@
+@startuml
+!define RELATIVE_INCLUDE
+!include ../vendor/C4_Component.puml
+' Локальная декомпозиция backend контейнера L3
+' Подключается из main.puml после C4_Component
+Container(web_app, "Веб-приложение", "TypeScript, React, Vite, Nginx", "Поездки, каталог и служебные операции")
+Container(mobile_app, "Мобильное приложение", "TypeScript, React Native, Expo", "Поездки и оценки мест")
+Container(auth_service, "Сервис авторизации", "Python, FastAPI, Authlib", "Токены, субъект и прикладные роли")
+Container(recommendation_service, "Сервис рекомендаций", "Python, FastAPI, scikit-learn", "Оценки кандидатов и объяснения")
+ContainerDb(database, "Операционная БД", "PostgreSQL, PostGIS", "Каталог, маршруты, оценки и аудит")
+System_Ext(maps_service, "Картографический сервис", "Геометрия пути и время движения")
+System_Ext(weather_service, "Сервис погоды", "Прогноз по координатам и датам")
+System_Ext(tourism_data, "Открытые туристические данные", "Карточки и категории мест")
+
+Container_Boundary(route_catalog_service, "Сервис маршрутов и каталога — один процесс Python / FastAPI") {
+ Component(api_comp, "API-контроллеры", "FastAPI Router, Pydantic", "Приём запросов и HTTP-ответы")
+ Component(auth_comp, "Проверка доступа", "Python, HTTPX", "Principal и разрешения операций")
+ Component(catalog_comp, "Управление каталогом", "Python", "Поиск, импорт и публикация мест")
+ Component(route_comp, "Построение маршрута", "Python", "Отбор и порядок точек, ограничения поездки")
+ Component(feedback_comp, "Обратная связь", "Python", "Проверка и сохранение оценок мест")
+ Component(repo_comp, "Репозиторий данных", "SQLAlchemy", "Запросы к БД и единица работы")
+ Component(integration_comp, "Адаптеры интеграций", "Python, HTTPX", "Единые DTO, тайм-ауты и ошибки API")
+}
+Rel(web_app, api_comp, "A1 Запросы и результаты", "HTTPS / REST / JSON")
+Rel(mobile_app, api_comp, "A2 Параметры и оценки", "HTTPS / REST / JSON")
+Rel(api_comp, auth_comp, "I1 Проверяет доступ", "Python Call")
+Rel(api_comp, catalog_comp, "I2 Каталог и публикация", "Python Call")
+Rel(api_comp, route_comp, "I3 Строит и читает маршрут", "Python Call")
+Rel(api_comp, feedback_comp, "I4 Сохраняет оценку", "Python Call")
+Rel(catalog_comp, repo_comp, "I5 Карточки и аудит", "Python Call")
+Rel(route_comp, repo_comp, "I6 Кандидаты и маршрут", "Python Call")
+Rel(feedback_comp, repo_comp, "I7 Оценка и аудит", "Python Call")
+Rel(catalog_comp, integration_comp, "I8 Импорт карточек", "Python Call")
+Rel(route_comp, integration_comp, "I9 Оценки, путь, прогноз", "Python Call")
+Rel(auth_comp, auth_service, "A3 Проверяет токен и роль", "HTTPS / REST / JSON")
+Rel(repo_comp, database, "A4 Читает и записывает", "PostgreSQL wire / TCP / TLS")
+Rel(integration_comp, recommendation_service, "A5 Кандидаты и контекст", "HTTPS / REST / JSON")
+Rel(integration_comp, maps_service, "A6 Точки и транспорт", "HTTPS / REST / JSON")
+Rel(integration_comp, weather_service, "A7 Координаты и даты", "HTTPS / REST / JSON")
+Rel(integration_comp, tourism_data, "A8 Импорт карточек", "HTTPS / REST / JSON")
+
+@enduml
