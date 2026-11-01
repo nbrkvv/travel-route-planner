@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+reference-images/
+docs/*.docx
+docs/*.pdf
+reference-images/
+docs/*.docx
+docs/*.pdf
