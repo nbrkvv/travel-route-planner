@@ -1,0 +1,59 @@
+diagrams\lab1-1.puml -checkonly: exit=0
+
+diagrams\lab1-1.puml -tpng: exit=0
+
+diagrams\lab1-1.puml -tsvg: exit=0
+
+diagrams\lab1-2.puml -checkonly: exit=0
+
+diagrams\lab1-2.puml -tpng: exit=0
+
+diagrams\lab1-2.puml -tsvg: exit=0
+
+diagrams\lab2-components.puml -checkonly: exit=0
+
+diagrams\lab2-components.puml -tpng: exit=0
+
+diagrams\lab2-components.puml -tsvg: exit=0
+
+diagrams\lab3-route-planner.puml -checkonly: exit=0
+
+diagrams\lab3-route-planner.puml -tpng: exit=0
+
+diagrams\lab3-route-planner.puml -tsvg: exit=0
+
+diagrams\lab4\deployment-backend.puml -checkonly: exit=0
+
+diagrams\lab4\deployment-backend.puml -tpng: exit=0
+
+diagrams\lab4\deployment-backend.puml -tsvg: exit=0
+
+diagrams\lab4\deployment-global.puml -checkonly: exit=0
+
+diagrams\lab4\deployment-global.puml -tpng: exit=0
+
+diagrams\lab4\deployment-global.puml -tsvg: exit=0
+
+diagrams\lab4\dynamic-backend.puml -checkonly: exit=0
+
+diagrams\lab4\dynamic-backend.puml -tpng: exit=0
+
+diagrams\lab4\dynamic-backend.puml -tsvg: exit=0
+
+diagrams\lab4\dynamic_process.puml -checkonly: exit=0
+
+diagrams\lab4\dynamic_process.puml -tpng: exit=0
+
+diagrams\lab4\dynamic_process.puml -tsvg: exit=0
+
+diagrams\lab4\landscape-backend.puml -checkonly: exit=0
+
+diagrams\lab4\landscape-backend.puml -tpng: exit=0
+
+diagrams\lab4\landscape-backend.puml -tsvg: exit=0
+
+diagrams\lab4\landscape-global.puml -checkonly: exit=0
+
+diagrams\lab4\landscape-global.puml -tpng: exit=0
+
+diagrams\lab4\landscape-global.puml -tsvg: exit=0
