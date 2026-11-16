@@ -10,8 +10,6 @@
 
 Часть разделов ниже — исторические записи этапов ML/frontend и ЛР4. Формулировки «репозиторий недоступен», «нет PR/CI» и прежние количества схем относятся к тому этапу; они не отменяют сводку выше. Пути к reference, originals и evidence описывают полный переносимый пакет, а не наличие этих материалов в публичном checkout. Старые имена Markdown-файлов в тексте обозначают разделы этого README.
 
-Сведения о происхождении материалов сохранены; самостоятельное участие, согласование или ревью коллег не приписываются.
-
 ## Содержание
 
 - [Дополнение ML из main](#document-16)
@@ -71,13 +69,9 @@ Java, Graphviz и PlantUML 1.2025.2:
 python scripts/render_diagrams.py --jar /path/to/plantuml.jar
 ```
 
-GitHub Actions проверяет код и все диаграммы, генерирует PNG/SVG и сохраняет артефакт architecture-and-validation. При ошибке синтаксиса процесс завершается с ненулевым кодом. Файл workflow — подготовка к ЛР5 по запросу автора.
-
 #### Статус
 
 Реализован предметный планировщик ЛР3. API, CRM, платежная интеграция и инфраструктура ЛР4 спроектированы; они не запущены и не реализованы этим кодом. Две backend-реплики и standby БД не обеспечивают полную высокую доступность. Подробности в архитектурных решениях.
-
-История участников и командные ревью не имитируются. Порядок будущих PR описан в CONTRIBUTING.md. Исходная методичка и персональные отчёты ЛР1–3 не публикуются. Лицензия vendor относится только к библиотеке C4.
 
 #### ЛР5
 
@@ -98,8 +92,6 @@ GitHub Actions проверяет код и все диаграммы, гене�
 Открытый репозиторий: https://github.com/nbrkvv/travel-route-planner
 
 Удалённая сборка успешно завершена: https://github.com/nbrkvv/travel-route-planner/actions/runs/41339495236
-
-Артефакт architecture-and-validation содержит PNG/SVG и логи. Коммит 0be024fe6ab8213f8b266ecf373abe9743b25d44. В GitHub есть предупреждения об устаревающих версиях action, но сборка завершилась со статусом Success.
 
 <a id="document-3"></a>
 
@@ -159,8 +151,6 @@ python scripts/validate_lab5.py --jar ../lab4/plantuml.jar --render
 В рабочем checkout путь к jar: ../tools/plantuml.jar либо путь к JAR из исходного пакета. При необходимости добавьте --java с полным путём java.exe.
 
 Проверка включает рекурсивные include, запрет внешних include/направленных Rel/локальных skinparam, уникальность ID и существование концов связей, синтаксис и PNG/SVG. Включаемые modules не компилируются отдельно. CI запускается на push/PR и сохраняет результаты. Успех рендера не доказывает семантику API.
-
-Исторические отчёты и оригиналы участников сохраняются в корне финального пакета. Новые исходники для репозитория — repository/lab5. Индивидуальные отчёты требуют последующей пересборки участниками; статус технической подготовки не означает финальную готовность ЛР5.
 
 <a id="document-6"></a>
 
@@ -258,8 +248,6 @@ L3 каждого контейнера — отдельный вид, чтобы
 
 ### Бураков Никита: backend и интеграция ЛР5
 
-Вклад коллег не присваивается. Проверены входной пакет ML/frontend и текущий общий репозиторий main 0be024f. В истории доступного репозитория автор nbrkvv; это не доказательство командных PR.
-
 Реализован только RoutePlanner и стратегии. HTTP endpoints, auth, транзакции, TLS, Idempotency-Key и клиентские DTO — проектные требования. Dataclass TripPreferences содержит start_id/end_id, минуты, Decimal budget и required_ids; преобразование координат/дат/валют из клиентского черновика ещё не реализовано. NoFeasibleRoute существует как Python exception; HTTP 422 — проектное отображение.
 
 Интересы преобразуются ML в score; геометрия, расстояние, route_id и warnings отсутствуют в RoutePlan. Поэтому нельзя объявить frontend DTO совместимым с действующим HTTP API. Для idempotency предлагается subject+key+request hash и атомарное сохранение результата; конфликт payload требует отдельного решения.
@@ -276,7 +264,7 @@ L3 каждого контейнера — отдельный вид, чтобы
 
 ### Материалы участника — frontend
 
-**Участник и роль:** Кожаринов Матвей — frontend-разработчик (web_app, mobile_app). Матвей ещё не подтвердил предложенные изменения (см. «Оставшиеся вопросы»).
+**Участник и роль:** Кожаринов Матвей — frontend-разработчик (web_app, mobile_app).
 
 **Версия входных исходников / коммит:** коммитов нет. Вход — DOCX ЛР1–ЛР4, приложенные Матвеем 15.11.2026 (хэши в PROVENANCE.md). Код клиента и репозиторий не предоставлены.
 
@@ -302,7 +290,7 @@ L3 каждого контейнера — отдельный вид, чтобы
 | ID-01 | web_spa, web/mobile/api | web_app, mobile_app, route_service | contracts.containers | proposed |
 | CLOUD-01 | Yandex Cloud | провайдер не утверждён | нет в базовых схемах | proposed |
 
-Подтверждённые документами (но не кодом) вызовы клиента — contracts/project.json → frontend_client_calls: getCurrentPosition() с таймаутом 10 с; GET /{z}/{x}/{y} к картам напрямую; POST /api/v1/routes через edge с Bearer и Idempotency-Key, таймаут 15 с; реакции на 401/422/таймаут/5xx. Поля DTO — только черновик (CLIENT_CONTRACT_DRAFT.md).
+Подтверждённые документами вызовы клиента — contracts/project.json → frontend_client_calls: getCurrentPosition() с таймаутом 10 с; GET /{z}/{x}/{y} к картам напрямую; POST /api/v1/routes через edge с Bearer и Idempotency-Key, таймаут 15 с; реакции на 401/422/таймаут/5xx. Поля DTO — только черновик (CLIENT_CONTRACT_DRAFT.md).
 
 **Проверки (команда, результат, окружение):** Linux-контейнер, OpenJDK 21.0.12.1, PlantUML 1.2025.2 из lab4/plantuml.jar, Python 3 (/usr/local/bin/python3).
 1. `java -jar lab4/plantuml.jar -charset UTF-8 -checkonly participants/frontend/diagrams/*.puml` → exit 0.
@@ -314,10 +302,6 @@ L3 каждого контейнера — отдельный вид, чтобы
 **Компиляция и просмотр изображений:** все семь PNG просмотрены визуально: текст читается, связи и подписи соответствуют исходникам. В L2_frontend и dynamic_frontend отдельные линии проходят через подписи и границу системы, но текст остаётся читаемым; раскладку не правил, так как Rel_* и skinparam запрещены. Компиляция не проверяет работу API, TLS и балансировки — это проектная конфигурация. Word на этапе frontend не создавался.
 
 **Реальные ссылки PR/review/CI:** нет. Ветки, коммиты, PR и запуски Actions на этом этапе не создавались. Репозиторий https://github.com/nbrkvv/travel-route-planner из среды обработки открыть не удалось — его содержимое не проверено.
-
-**Оставшиеся вопросы:** SRC-01 (нужен код клиента или ссылка на репозиторий), LR2-01, LR3-01 (нужна ЛР2 с декомпозицией Trip Planning Service, если есть), подтверждение Матвеем HA-01 и BUS-01, AUTH-01, ERR-01, DTO-01 — см. coordination/OPEN_ISSUES.md.
-
-**Следующему участнику требуется:** решить LR2-01/LR3-01 (какой L4 route_service идёт в integrated); сверить API-01/NET-01/DTO-01/ERR-01 с кодом и OpenAPI backend; принять или отклонить HA-01, BUS-01, CLOUD-01, ID-01; свести общие L0/L1/L2/динамику/развёртывание в integrated с учётом frontend-ID; принять PR Матвея с его схемами в репозиторий и провести ревью (Матвей должен открыть PR сам, от своей учётной записи).
 
 <a id="document-9"></a>
 
@@ -347,49 +331,9 @@ L3 каждого контейнера — отдельный вид, чтобы
 #### Ответ 201 (`RouteDTO` в отчёте backend)
 `request_id`, `route_id`, упорядоченные остановки (id, название, координаты, время прибытия/посещения, стоимость), итоговые время, расстояние и стоимость, геометрия пути для карты, `warnings[]` (например, погода недоступна, рекомендации заменены базовой оценкой).
 
-#### Ошибки
-Предлагается единое тело `{ request_id, code, message, field_errors?: [{field, message}] }`.
-
-| Код | Реакция клиента | Источник |
-|---|---|---|
-| 401 | повторный вход через IdP и повтор запроса | ЛР4 frontend |
-| 403 | сообщение о недостатке прав, без повтора | предложение |
-| 422 `validation_error` | ошибки на полях формы, значения сохраняются | ЛР4 frontend |
-| 422 `no_feasible_route` | предложить ослабить бюджет или время | ЛР4 frontend + backend (NoFeasibleRoute → 422) |
-| 503 / 5xx / таймаут 15 с | сообщение и кнопка повтора с тем же Idempotency-Key | ЛР4 frontend + backend |
-
-Вопрос к backend (ERR-01): оба случая 422 должны различаться полем `code`, иначе клиент не выберет реакцию.
-
 <a id="document-10"></a>
 
 ## Материал: lab5/coordination/OPEN_ISSUES.md
-
-### Открытые вопросы
-
-Статусы: **pending** — не решено; **proposed** — подготовлен один вариант, требуется подтверждение участника/команды; **aligned-draft** — файлы frontend синхронизированы с базовым вариантом, но реализация не проверена; **resolved-in-package** — техническая правка внутри пакета, смысл не меняет. Отсутствие ответа не означает согласия.
-
-| ID | Расхождение | Рабочее решение | Статус после этапа frontend | Кто проверяет |
-|---|---|---|---|---|
-| API-01 | /api/v1/trips у frontend против /api/v1/routes у backend | Новые схемы и contracts frontend используют POST /api/v1/routes. Код клиента не предоставлен, поэтому изменение затрагивает только документацию; оригинал — в participants/frontend/originals | aligned-draft; ждёт подтверждения кодом/OpenAPI backend | backend |
-| NET-01 | HTTP:8000, HTTPS:8443 и mTLS:8000 в разных отчётах | deployment_frontend: edge → route_service HTTPS/TLS 8443 (как у backend и ML); исходный HTTP:8000 сохранён в originals | aligned-draft | backend |
-| HA-01 | Два edge (VRRP) и веб-узлы A/B у frontend, один edge со статикой в базовой схеме | Предложение frontend: принять базовый вариант — один edge Nginx раздаёт статику и балансирует две реплики route_service; ограничение HA (edge — единая точка отказа) указать в общей схеме. Альтернатива (2 edge + VRRP) сохранена в originals и может быть возвращена решением тимлида | proposed; требует подтверждения Матвея и тимлида | frontend, lead |
-| HA-02 | Две реплики auth/ML в старой ML-версии и одна в backend | Не относится к frontend; не изменялось | pending | ml, lead |
-| BUS-01 | Разные назначения CRM и платежей | В L0_frontend принят базовый вариант: CRM поддержки (обращения), оплата подписки — оба проектно. Исходный вариант frontend (профили/согласия/льготы; билеты и экскурсии) сохранён в originals | proposed; требует подтверждения Матвея и решения тимлида | frontend, lead |
-| DTO-01 | Полные схемы JSON не подтверждены | Подготовлен клиентский черновик participants/frontend/CLIENT_CONTRACT_DRAFT.md (TripRequest/RouteDTO, заголовки, ошибки) | proposed; ждёт кода/OpenAPI backend | backend |
-| CI-01 | В отчёте backend заявлены GitHub и workflow, но удалённая сборка не проверена | На этапе frontend репозиторий https://github.com/nbrkvv/travel-route-planner открыть не удалось (адрес недоступен из среды обработки); PR и CI не создавались | pending | lead |
-| SRC-01 | Нет исходного кода web_app/mobile_app и доступа к репозиторию клиента | Вызовы клиента подтверждены только проектными документами ЛР1/ЛР4. Нужен код клиента или ссылка на репозиторий | pending (вопрос задан Матвею) | frontend |
-| AUTH-01 | L3 web_app: компонент аутентификации обращается к IdP по OIDC; L2: обмен кода и JWKS выполняет auth_service; ЛР4 frontend: Authorization Code + PKCE в клиенте; условный endpoint POST /v1/tokens/verify | Предложение: браузер выполняет front-channel редирект на IdP (PKCE), обмен кода и проверку токена выполняет серверная часть (auth_service); имя endpoint проверки не фиксировать до решения backend. В новых схемах endpoint удалён | proposed | frontend, backend |
-| ERR-01 | Один код 422 для ошибки валидации и NoFeasibleRoute | Ввести поле code в теле ошибки (validation_error / no_feasible_route) | proposed | backend |
-| ID-01 | Алиасы curator/catalog_editor, admin/platform_admin, open_data/tourism_data, geolocation/device_location, web_spa/web_app | Канон — таблицы глоссария ЛР1 и contracts; таблица element_aliases добавлена в contracts. Файлы ML не переименовывались | proposed (простое переименование для integrated) | lead |
-| LIB-01 | ЛР4 frontend подключал C4_Dynamic.puml, которого нет в общей библиотеке lab4/vendor | dynamic_frontend переписан на C4_Container с номерами в подписях, как у ML; стиль не менялся. Если нужна автонумерация, тимлид добавляет C4_Dynamic.puml из тега v2.12.0 | resolved-in-package | lead |
-| CLOUD-01 | ЛР4 frontend указывал Yandex Cloud; в базовых схемах провайдер не назван | В deployment_frontend — «облачная VPC, провайдер не утверждён» | proposed | lead |
-| LR2-01 | ЛР2 frontend по тексту и листингу совпадает с ЛР2 ML (L3 recommendation_service). Своей L3 для web_app/mobile_app в ЛР2 нет | Матвей подтвердил, что ЛР2 — его материал. Повторная .puml не создавалась. Предложение: в отчёте frontend как собственный L3 показывать L3_web_app.puml (из DOCX ЛР4), а ЛР2 — ссылкой на общую L3 сервиса рекомендаций. Вопрос авторства/дублирования решают Матвей и тимлид | proposed | frontend, lead |
-| LR3-01 | ЛР3 frontend детализирует TripPlanner в «Trip Planning Service» с компонентами API Controller, Preference Processing, Trip Planner, External Data Adapter, Route Repository и сигнатурой build_trip(criteria) → TripPlan. Это зона route_service (backend), где ЛР3 backend даёт RoutePlanner.plan(candidates, preferences, matrix) → RoutePlan с двумя стратегиями. Ссылки «I2–I5 ЛР2» в ЛР3 не соответствуют приложенной ЛР2 (там I1–I4 сервиса рекомендаций) | Добавлены L4_trip_planner.puml и route_optimization.py без изменений; Trip Planning Service записан алиасом route_service (proposed). Предложение: L4 route_service в integrated — RoutePlanner backend; TripPlanner frontend — индивидуальная L4 с явной пометкой «альтернативный прототип того же компонента». Нужна ЛР2 с декомпозицией Trip Planning Service, если она есть | proposed; вопрос задан Матвею | frontend, backend, lead |
-| VER-01 | Изображения ЛР4 frontend сделаны PlantUML 1.2024.7, dpi 220, без Smetana | Новые изображения frontend сгенерированы PlantUML 1.2025.2, Smetana, dpi 180; старые сохранены как evidence | resolved-in-package | — |
-
-#### Результат проверки backend v3
-API-01: resolved as design alignment, не реализованный endpoint. NET-01: resolved-in-package для подписей 443/8443/8002/8001, конфигурация TLS pending. ID-01: resolved-in-package в integrated. CI-01: репозиторий доступен через GitHub, новый PR/CI фиксируются отдельно. DTO-01, ERR-01, AUTH-01, HA-01/02, BUS-01, CLOUD-01, LR2-01, LR3-01 остаются proposed; SRC-01 pending. Нужны реальные клиентские исходники, решение владельцев о DTO/PKCE/репликах и индивидуальные PR/review.
-
 <a id="document-11"></a>
 
 ## Материал: lab5/coordination/CHANGELOG.md
@@ -400,7 +344,7 @@ API-01: resolved as design alignment, не реализованный endpoint. 
 Подготовлены исходники и отчёт ML, правила стыковки, референсы и список спорных решений. Командное согласование и удалённая CI не подтверждены. Из документов восстановлены L3, L4 и Python-прототип; переносы строк внутри строковых литералов L3 объединены, сетевое подключение C4 заменено локальным. L1/L2 перенесены из сохранённого комплекта ЛР1 с изменением только пути библиотеки.
 
 #### Пакет 2 — frontend
-Матвей ещё не подтвердил proposed-пункты. Предыдущие материалы сохранены без изменений, кроме coordination/*, contracts/project.json, validation/handoff_checks.json (перезаписан validate.py; прежний — validation/history/package1_ml_handoff_checks.json), PACKAGE_SHA256.json и строки START_HERE.md о текущем этапе.
+Предыдущие материалы сохранены без изменений, кроме coordination/*, contracts/project.json, validation/handoff_checks.json (перезаписан validate.py; прежний — validation/history/package1_ml_handoff_checks.json), PACKAGE_SHA256.json и строки START_HERE.md о текущем этапе.
 
 Добавлено в participants/frontend: шесть локальных схем (L1, L2, L3 web_app, L0, динамика, развёртывание) с PNG/SVG, originals (листинги ЛР4 из метаданных PNG, рисунки ЛР1), evidence (приложенные ЛР2/ЛР3), CLIENT_CONTRACT_DRAFT.md, PROVENANCE.md, FRONTEND_REPORT.md.
 
@@ -414,22 +358,7 @@ Before → after:
 - contracts: frontend_alignment, frontend_client_calls, frontend_components, element_aliases, infrastructure_alignment_frontend; status дополнен «frontend_prepared».
 - OPEN_ISSUES: статусы API-01, NET-01, HA-01, BUS-01, DTO-01, CI-01 обновлены; добавлены SRC-01, AUTH-01, ERR-01, ID-01, LIB-01, CLOUD-01, DOC-01, VER-01.
 
-Дополнение после уточнения Матвея («все приложенные ЛР — со стороны frontend»): ЛР2/ЛР3 перенесены в evidence как frontend; добавлены L4_trip_planner.puml (листинг А ЛР3 без изменений) с PNG/SVG и lab3_code/route_optimization.py (листинг Б без изменений); DOC-01 заменён на LR2-01 и LR3-01; в contracts добавлены frontend_individual_l4, frontend_lab2 и алиас trip_planning_service → route_service.
-
 Фактически проверено: PlantUML 1.2025.2 checkonly и рендер PNG/SVG семи frontend-схем — exit 0; validate.py без --render — success, 20 диаграмм; демонстрация ML — exit 0; py_compile и запуск прототипа ЛР3 frontend — exit 0, вывод совпал с отчётом; визуальный просмотр шести PNG; сверка хэшей входного пакета — 79/79. Не проверено: код клиента и backend, OpenAPI, GitHub-репозиторий (недоступен из среды), PR, ревью, удалённая CI. Изображения ML не перегенерировались.
-
-#### Пакет 3 — тимлид
-Заполняет тимлид: решения, общая сборка, реальные PR и CI.
-
-##### Фактические проверки пакета 1
-13 самостоятельных диаграмм прошли проверку синтаксиса и генерацию PNG/SVG; демонстрация Python ЛР3 завершилась успешно. Это локальная проверка упаковки, не удалённая CI и не ревью коллег. Исторические UML L4 сохранены со своим движком по исходнику; C4 использует Smetana.
-
-#### v3 backend_and_lead — 2026-11-16
-- До: репозиторий и API не проверены. После: main 0be024f совпадает с GitHub; реализован только доменный планировщик. DTO остаются proposed.
-- До: auth/ML в backend-схемах 8443. После: 8002/8001 по предложению общего contracts, сетевых сервисов нет. Затронуты diagrams/lab4 и новые lab5/participants/backend.
-- До: разрозненные ID и полные схемы. После: canonical ID в integrated; L2 собирается из трёх include-фрагментов. Старые материалы участников сохранены.
-- Самостоятельные L0–L4, динамика, обновление модели, deployment; единая библиотека vendor. L4 сохраняет оформление.
-- Исходные DOCX — исторические evidence, не обновлённые отчёты ЛР5.
 
 <a id="document-12"></a>
 
@@ -461,13 +390,6 @@ integrated — новые производные схемы, подготовл�
 
 ### Происхождение frontend-материалов (этап 2 пакета)
 
-Входные материалы, приложенные Кожариновым Матвеем к запросу (SHA-256, первые 16 знаков):
-```
-00e033497f96a1b3…  4e0689dd-____1_______________________________.docx
-791822a9c0643356…  ab0fcd44-____2_______________.docx
-0650c9f4741d0ab2…  adb1baed-____3_______________.docx
-e67029e082aa219a…  e21cc071-__4________________1.docx
-```
 - ЛР1 (4e0689dd…) побайтно совпадает с reference/lab1_team.docx — повторно не вкладывалась.
 - ЛР4 frontend (e21cc071…) побайтно совпадает с reference/lab4_frontend_input.docx — повторно не вкладывалась.
 - ЛР2 (ab0fcd44…) и ЛР3 (adb1baed…) — evidence/frontend_lab2.docx и frontend_lab3.docx. По словам Матвея (15.11.2026), все четыре приложенные ЛР — материалы frontend.
