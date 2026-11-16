@@ -2,6 +2,7 @@
 !pragma layout smetana
 !define RELATIVE_INCLUDE
 !include ../../../../vendor/C4_Container.puml
+!assert C4Version() == "2.12.0" : "Требуется C4-PlantUML 2.12.0 из vendor"
 LAYOUT_TOP_DOWN()
 title Динамика frontend — построение маршрута через веб-приложение
 ' Основа: листинг А.2 ЛР4 frontend. C4_Dynamic отсутствует в общей библиотеке пакета, поэтому номера шагов указаны в подписях, как в схемах ML.
