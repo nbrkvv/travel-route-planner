@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../../../vendor/C4_Deployment.puml
+LAYOUT_TOP_DOWN()
+title L2 Локальное развёртывание ML
+Deployment_Node(backend_node, "Сервер приложений", "Linux / Docker") {
+ Container(route_service, "Сервис маршрутов и каталога", "FastAPI :8443", "Смежный контейнер")
+ Container(recommendation_service, "Сервис рекомендаций", "FastAPI :8001 / TLS", "Один процесс; реестр и RAM-кэш внутри")
+}
+Deployment_Node(worker, "Узел пакетного обучения", "Linux / Docker job") {
+ Container(model_training, "Пакетное обучение модели", "Python / scikit-learn", "Подготовка и выпуск артефакта")
+}
+Deployment_Node(data, "Закрытый сегмент данных", "Private subnet") {
+ Deployment_Node(pg, "Узел операционной БД", "Linux") {
+  ContainerDb(database, "Операционная БД", "PostgreSQL / PostGIS :5432", "Каталог и обезличенная обратная связь")
+ }
+ Deployment_Node(s3, "Узел хранилища моделей", "Linux") {
+  ContainerDb(model_storage, "Хранилище моделей", "MinIO / S3 :9000", "Модели, признаки и метаданные")
+ }
+}
+System_Ext(open_data, "Туристические открытые данные", "Внешний источник признаков")
+Rel(route_service, recommendation_service, "Передаёт кандидатов; получает оценки", "HTTPS / TLS, 8001")
+Rel(recommendation_service, model_storage, "Периодически проверяет и загружает версию", "HTTPS / S3 / TLS, 9000")
+Rel(model_training, database, "Читает данные обучения", "PostgreSQL / TLS, 5432")
+Rel(model_training, model_storage, "Публикует одобренную модель", "HTTPS / S3 / TLS, 9000")
+Rel(model_training, open_data, "Получает описания мест", "HTTPS / REST, 443")
+SHOW_LEGEND()
+@enduml
