@@ -1,0 +1,3 @@
+  Container(route_service, "Сервис маршрутов и каталога", "Python, FastAPI, SQLAlchemy", "Каталог, ограничения, расчет и сохранение маршрута")
+  Container(auth_service, "Сервис авторизации", "Python, FastAPI, Authlib", "Вход через провайдера, проверка токенов и прикладных ролей")
+  ContainerDb(database, "Операционная база данных", "PostgreSQL, PostGIS", "Профили, каталог, маршруты, оценки и журнал изменений")

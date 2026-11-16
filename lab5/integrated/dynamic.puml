@@ -1,0 +1,35 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Container.puml
+LAYOUT_TOP_DOWN()
+title Динамика команды — построение маршрута
+Person(traveler, "Путешественник", "Вошёл в систему")
+Container(web_app, "Веб-приложение", "React / Vite", "Мобильный клиент использует тот же API")
+Container(route_service, "Сервис маршрутов и каталога", "FastAPI", "Расчёт и сохранение")
+Container(auth_service, "Сервис авторизации", "FastAPI / Authlib", "Токены и роли")
+Container(recommendation_service, "Сервис рекомендаций", "FastAPI / scikit-learn", "Оценки и объяснения")
+ContainerDb(database, "Операционная БД", "PostgreSQL / PostGIS", "Каталог и маршруты")
+System_Ext(maps_service, "Картографический сервис", "Матрица, геометрия, тайлы")
+System_Ext(weather_service, "Сервис погоды", "Прогноз")
+Rel(traveler, web_app, "1. Задаёт параметры поездки", "UI браузера")
+Rel(web_app, route_service, "2. POST /api/v1/routes", "HTTPS / JSON, 443 через edge")
+Rel(route_service, auth_service, "3. Проверяет токен и право routes:create", "HTTPS / JSON, 8002")
+Rel(route_service, database, "4. Читает опубликованных кандидатов", "PostgreSQL / TLS, 5432")
+Rel(route_service, recommendation_service, "5. POST /v1/recommendations: получает оценки", "HTTPS / JSON, 8001")
+Rel(route_service, maps_service, "6. Получает матрицу времени", "HTTPS / REST, 443")
+Rel(route_service, weather_service, "7. Получает прогноз", "HTTPS / REST, 443")
+Rel(route_service, maps_service, "8. После plan() получает геометрию", "HTTPS / REST, 443")
+Rel(route_service, database, "9. После проверки ограничений сохраняет маршрут", "PostgreSQL / TLS, 5432")
+Rel(web_app, maps_service, "10. После ответа API загружает тайлы", "HTTPS / Tiles, 443")
+Rel(web_app, traveler, "11. Показывает сохранённый маршрут", "UI браузера")
+Rel(route_service, web_app, "9b. HTTP 201 RouteDTO после COMMIT, warnings и request_id", "HTTPS / JSON, 443 через edge")
+note right of route_service
+7b. RoutePlanner.plan(candidates, preferences, matrix)
+9a. Повторная проверка ограничений, затем транзакция маршрут + аудит
+401/403: остановка до записи; NoFeasibleRoute: 422 (proposed)
+ML: fallback score + warning; погода: warning
+Карты недоступны: 503 без записи; ошибка записи: rollback
+end note
+SHOW_LEGEND()
+@enduml

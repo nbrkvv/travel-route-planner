@@ -1,0 +1,352 @@
+{
+  "schema_version": "1.0",
+  "project": "Система построения маршрута в путешествии на основе предпочтений пользователя",
+  "team": {
+    "ml": "Дадонов Дмитрий",
+    "frontend": "Кожаринов Матвей",
+    "backend_and_lead": "Бураков Никита"
+  },
+  "status": "backend_prepared_pending_team_review",
+  "baseline": "Подготовленный отчёт ЛР4 Дадонова; не означает согласование коллегами",
+  "render": {
+    "plantuml": "1.2025.2",
+    "c4_plantuml": "2.12.0",
+    "layout": "smetana",
+    "png_dpi": 180,
+    "source": "vendor/; PlantUML JAR supplied in final ZIP lab4/plantuml.jar"
+  },
+  "containers": [
+    {
+      "id": "web_app",
+      "lab1_alias": "web",
+      "owner": "frontend"
+    },
+    {
+      "id": "mobile_app",
+      "lab1_alias": "mobile",
+      "owner": "frontend"
+    },
+    {
+      "id": "route_service",
+      "lab1_alias": "api",
+      "owner": "backend"
+    },
+    {
+      "id": "auth_service",
+      "lab1_alias": "auth",
+      "owner": "backend"
+    },
+    {
+      "id": "database",
+      "lab1_alias": "db",
+      "owner": "backend"
+    },
+    {
+      "id": "recommendation_service",
+      "lab1_alias": "recommend",
+      "owner": "ml"
+    },
+    {
+      "id": "model_training",
+      "lab1_alias": "training",
+      "owner": "ml"
+    },
+    {
+      "id": "model_storage",
+      "lab1_alias": "models",
+      "owner": "ml"
+    }
+  ],
+  "ml_components": [
+    "rec_api_comp",
+    "rec_inference_comp",
+    "rec_explainer_comp",
+    "rec_model_registry_comp"
+  ],
+  "invariants": [
+    "Восемь логических контейнеров; Nginx — инфраструктура",
+    "Четыре L3-компонента рекомендаций в одном Python-процессе",
+    "ModelCache — класс внутри реестра, без Redis и отдельного микросервиса",
+    "Фоновое обновление не выполняется обязательным шагом каждого запроса",
+    "Активная модель защищена от вытеснения",
+    "Без MinIO работает только ранее загруженная модель; холодный запуск без модели не готов",
+    "Логическая квота кэша не равна ограничению физического RSS",
+    "Каждая локальная схема предшествует соответствующей общей в индивидуальном отчёте"
+  ],
+  "proposed_interfaces": [
+    {
+      "id": "create_route",
+      "caller": [
+        "web_app",
+        "mobile_app"
+      ],
+      "callee": "route_service",
+      "method": "POST",
+      "path": "/api/v1/routes",
+      "transport": "HTTPS/JSON",
+      "public_port": 443,
+      "internal_port": 8443,
+      "input_semantics": [
+        "интересы",
+        "время",
+        "бюджет",
+        "транспорт",
+        "стартовая точка"
+      ],
+      "output_semantics": [
+        "сохранённый маршрут",
+        "предупреждения"
+      ],
+      "schema_status": "Названия полей, типы и DTO требуют проверки реализации backend",
+      "frontend_alignment": {
+        "status": "proposed_frontend_aligned",
+        "before": "POST /api/v1/trips (ЛР4 frontend, проектное имя)",
+        "after": "POST /api/v1/routes (отчёт ЛР4 backend и базовый пакет ML)",
+        "client_headers": [
+          "Authorization: Bearer <access_token>",
+          "Idempotency-Key: <uuid>, тот же ключ при повторе после таймаута/5xx",
+          "Content-Type: application/json"
+        ],
+        "client_timeouts": {
+          "geolocation_s": 10,
+          "create_route_s": 15
+        },
+        "client_error_handling": {
+          "401": "повторный вход через IdP и повтор запроса",
+          "403": "сообщение о недостатке прав без повтора (предложение этапа frontend; в ЛР4 frontend не описано)",
+          "422": "ошибки валидации — к полям формы; NoFeasibleRoute — предложение ослабить бюджет/время (нужен различимый код ошибки, см. ERR-01)",
+          "503/5xx/timeout": "сообщение и кнопка повтора с тем же Idempotency-Key",
+          "source_note": "401, 422, таймаут/5xx — ЛР4 frontend, табл. 3.2; 403 и различение 422 — предложение"
+        },
+        "verified_by_code": false,
+        "evidence": "Только проектные документы: ЛР4 frontend (раздел 3), ЛР4 backend (шаги 1–11). Код клиента и backend/OpenAPI не предоставлены."
+      }
+    },
+    {
+      "id": "rank",
+      "caller": "route_service",
+      "callee": "recommendation_service",
+      "method": "POST",
+      "path": "/v1/recommendations",
+      "transport": "HTTPS/JSON",
+      "port": 8001,
+      "input_semantics": [
+        "ID и признаки кандидатов",
+        "интересы",
+        "контекст"
+      ],
+      "output_semantics": [
+        "ID кандидатов",
+        "score в диапазоне [0,1]",
+        "объяснения",
+        "версия модели"
+      ],
+      "schema_status": "Семантика определена; точная JSON-схема не подтверждена реализацией"
+    },
+    {
+      "id": "auth",
+      "caller": "route_service",
+      "callee": "auth_service",
+      "transport": "HTTPS/JSON",
+      "port": 8002,
+      "method": null,
+      "path": null,
+      "status": "Точный endpoint не утверждён; не выдавать условное имя функции за реализованный API",
+      "frontend_note": "ЛР4 frontend использовал условное POST /v1/tokens/verify; в новых схемах frontend endpoint не указывается (только 'проверяет токен и право routes:create', 8002)."
+    },
+    {
+      "id": "models",
+      "caller": [
+        "recommendation_service",
+        "model_training"
+      ],
+      "callee": "model_storage",
+      "transport": "HTTPS/S3",
+      "port": 9000,
+      "security": "TLS требует настройки сервера; разные права чтения и публикации"
+    },
+    {
+      "id": "data",
+      "caller": [
+        "route_service",
+        "auth_service",
+        "model_training"
+      ],
+      "callee": "database",
+      "transport": "PostgreSQL/TLS",
+      "port": 5432
+    }
+  ],
+  "proposed_deployment": {
+    "route_service_replicas": 2,
+    "auth_service_replicas": 1,
+    "recommendation_service_processes": 1,
+    "edge_nodes": 1,
+    "model_storage_nodes": 1,
+    "postgres": "Primary + async Standby; ручной failover"
+  },
+  "proposed_extensions": {
+    "tourism_crm": "CRM поддержки",
+    "payment_gateway": "оплата подписки",
+    "status": "проектно; прототипом не реализовано"
+  },
+  "frontend_client_calls": {
+    "status": "confirmed_by_design_documents_only",
+    "items": [
+      {
+        "id": "geo_web",
+        "caller": "web_app",
+        "callee": "device_location",
+        "call": "navigator.geolocation.getCurrentPosition()",
+        "transport": "Browser Geolocation API",
+        "timeout_s": 10,
+        "fallback": "старт указывается на карте или адресом"
+      },
+      {
+        "id": "geo_mobile",
+        "caller": "mobile_app",
+        "callee": "device_location",
+        "call": "API геолокации ОС (конкретный модуль Expo не подтверждён)",
+        "transport": "API геолокации ОС"
+      },
+      {
+        "id": "tiles",
+        "caller": [
+          "web_app",
+          "mobile_app"
+        ],
+        "callee": "maps_service",
+        "method": "GET",
+        "path": "/{z}/{x}/{y}",
+        "transport": "HTTPS/Tiles",
+        "public_port": 443,
+        "note": "напрямую, не через edge; провайдер карт не выбран"
+      },
+      {
+        "id": "create_route",
+        "caller": [
+          "web_app",
+          "mobile_app"
+        ],
+        "callee": "route_service",
+        "via": "edge_nginx :443 → route_service :8443/TLS",
+        "see": "proposed_interfaces.create_route"
+      },
+      {
+        "id": "login",
+        "caller": "web_app",
+        "callee": "idp",
+        "transport": "HTTPS/OIDC Authorization Code + PKCE",
+        "status": "proposed; распределение ролей web_auth_comp и auth_service — AUTH-01"
+      }
+    ],
+    "dto_draft": "participants/frontend/CLIENT_CONTRACT_DRAFT.md (proposed, не подтверждено реализацией)"
+  },
+  "frontend_components": {
+    "container": "web_app",
+    "source": "восстановлено из изображения в DOCX ЛР4 frontend",
+    "ids_status": "proposed (назначены при восстановлении)",
+    "ids": [
+      "web_catalog_comp",
+      "web_trip_form_comp",
+      "web_map_comp",
+      "web_editor_comp",
+      "web_admin_comp",
+      "web_auth_comp",
+      "web_state_comp",
+      "web_api_client_comp"
+    ]
+  },
+  "element_aliases": {
+    "status": "proposed; простое переименование, без новых элементов",
+    "canonical_source": "таблицы глоссария ЛР1 и contracts.containers",
+    "aliases": {
+      "catalog_editor": [
+        "curator"
+      ],
+      "platform_admin": [
+        "admin"
+      ],
+      "travel_system": [
+        "travel"
+      ],
+      "maps_service": [
+        "maps"
+      ],
+      "weather_service": [
+        "weather"
+      ],
+      "device_location": [
+        "geolocation"
+      ],
+      "tourism_data": [
+        "open_data"
+      ],
+      "web_app": [
+        "web",
+        "web_spa",
+        "web_app_a",
+        "web_app_b"
+      ],
+      "mobile_app": [
+        "mobile"
+      ],
+      "route_service": [
+        "api",
+        "route_catalog_service",
+        "route_a",
+        "route_b",
+        "trip_planning_service (ЛР3 frontend)"
+      ]
+    },
+    "note": "Файлы ML не переименовывались на этапе frontend; унификацию делает тимлид в integrated."
+  },
+  "infrastructure_alignment_frontend": {
+    "edge_to_backend": {
+      "before": "HTTP/JSON :8000",
+      "after": "HTTPS/TLS :8443",
+      "status": "aligned_to_baseline (NET-01)"
+    },
+    "edge_nodes": {
+      "before": "2 узла A/B, VRRP + веб-узлы A/B (Nginx :8080)",
+      "after": "1 edge Nginx :443, статика с edge",
+      "status": "proposed (HA-01)"
+    },
+    "cloud_provider": {
+      "before": "Yandex Cloud",
+      "after": "не утверждён (облачная VPC)",
+      "status": "proposed (CLOUD-01)"
+    }
+  },
+  "frontend_individual_l4": {
+    "source": "ЛР3 frontend",
+    "diagram": "participants/frontend/diagrams/L4_trip_planner.puml",
+    "code": "participants/frontend/lab3_code/route_optimization.py",
+    "component": "Trip Planner в route_service (алиас Trip Planning Service)",
+    "signature": "TripPlanner.build_trip(criteria: TripCriteria) -> TripPlan",
+    "backend_counterpart": "RoutePlanner.plan(candidates, preferences, matrix) -> RoutePlan (ЛР3 backend)",
+    "status": "proposed; см. LR3-01"
+  },
+  "frontend_lab2": {
+    "status": "совпадает с ЛР2 ML (L3 recommendation_service)",
+    "see": "LR2-01"
+  },
+  "implementation_evidence": {
+    "repository": "https://github.com/nbrkvv/travel-route-planner",
+    "base_commit": "0be024fe6ab8213f8b266ecf373abe9743b25d44",
+    "implemented": "src/planner.py: RoutePlanner.plan(candidates, preferences, matrix) -> RoutePlan",
+    "http_api_implemented": false,
+    "client_code_available": false
+  },
+  "backend_decisions": {
+    "API-01": "Retain POST /api/v1/routes as design; no HTTP implementation exists",
+    "NET-01": "443 edge -> 8443 backend; auth 8002; ML 8001, proposed port allocation, not listening sockets",
+    "DTO-01": "Frontend JSON draft retained; domain dataclasses are not transport DTOs",
+    "ERR-01": "Propose code=validation_error/no_feasible_route; not implemented",
+    "LR3-01": "Backend RoutePlanner is integrated L4; frontend TripPlanner remains alternative prototype",
+    "HA-01": "Propose single edge; team confirmation pending",
+    "HA-02": "Propose one auth and one ML process; team confirmation pending",
+    "BUS-01": "Propose CRM support and subscription payments; team confirmation pending",
+    "AUTH-01": "Auth service exchanges code and validates access; callback/API and PKCE ownership pending"
+  }
+}

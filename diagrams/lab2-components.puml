@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 !define RELATIVE_INCLUDE
 !include ../vendor/C4_Component.puml
 ' Локальная декомпозиция backend контейнера L3

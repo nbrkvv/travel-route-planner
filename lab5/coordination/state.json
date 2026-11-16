@@ -1,0 +1,39 @@
+{
+  "package_version": 3,
+  "next_role": "team_review",
+  "roles": {
+    "ml": {
+      "status": "prepared",
+      "reviewed_by_teammates": false
+    },
+    "frontend": {
+      "status": "prepared",
+      "prepared_by": "ИИ-ассистент по поручению Кожаринова Матвея",
+      "confirmed_by_participant": false,
+      "reviewed_by_teammates": false,
+      "note": "prepared — статус подготовки, а не согласования; HA-01, BUS-01 ожидают подтверждения Матвея"
+    },
+    "backend_and_lead": {
+      "status": "prepared",
+      "prepared_by": "AI assistant at request of Бураков Никита",
+      "reviewed_by_teammates": false
+    }
+  },
+  "git": {
+    "repository_url": "https://github.com/nbrkvv/travel-route-planner",
+    "pull_requests": [],
+    "remote_ci_verified": false
+  },
+  "checks": {
+    "package_sources_checked": true,
+    "frontend_checked": true,
+    "integrated_checked": true,
+    "local_validation": "validation/lab5_checks.json",
+    "frontend_local_validation": [
+      "participants/frontend/validation/render_log.txt",
+      "validation/handoff_checks.json"
+    ],
+    "frontend_client_code_checked": false,
+    "backend_repository_checked": true
+  }
+}

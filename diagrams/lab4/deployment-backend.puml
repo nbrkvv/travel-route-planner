@@ -20,12 +20,12 @@ Deployment_Node(cloud, "Приватное облако оператора", "VP
  Deployment_Node(app_b, "Узел приложений B", "Linux / Docker") {
  Container(api_b, "Backend B", "FastAPI / Uvicorn", "Вторая реплика того же контейнера")
  Container(recommendation_service, "Рекомендации", "Python / FastAPI", "Inference")
- 
+
  }
  Deployment_Node(data, "Подсеть данных", "Изолированный сегмент") {
  ContainerDb(database, "Primary", "PostgreSQL / PostGIS", "Запись и чтение актуальных данных")
  ContainerDb(replica, "Standby", "PostgreSQL / PostGIS", "Асинхронная реплика; ручное переключение")
- 
+
  }
 }
 System_Ext(external_apis, "Внешние API", "Карты, погода, IAM, каталог, CRM, платежи")
@@ -37,10 +37,10 @@ Rel(api_a, database, "Каталог, маршруты, аудит", "PostgreSQL
 Rel(api_b, database, "Каталог, маршруты, аудит", "PostgreSQL / TCP 5432 / TLS verify-full")
 Rel(auth_service, database, "Профили и роли", "TCP 5432 / TLS")
 Rel(database, replica, "Streaming replication", "TCP 5432 / TLS")
-Rel(api_a, auth_service, "Principal", "HTTPS / TCP 8443 / TLS")
-Rel(api_b, auth_service, "Principal", "HTTPS / TCP 8443 / TLS")
-Rel(api_a, recommendation_service, "Ранжирование", "HTTPS / TCP 8443 / TLS")
-Rel(api_b, recommendation_service, "Ранжирование", "HTTPS / TCP 8443 / TLS")
+Rel(api_a, auth_service, "Principal", "HTTPS / TCP 8002 / TLS")
+Rel(api_b, auth_service, "Principal", "HTTPS / TCP 8002 / TLS")
+Rel(api_a, recommendation_service, "Ранжирование", "HTTPS / TCP 8001 / TLS")
+Rel(api_b, recommendation_service, "Ранжирование", "HTTPS / TCP 8001 / TLS")
 
 
 

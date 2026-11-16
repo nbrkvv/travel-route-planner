@@ -1,0 +1,49 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Component.puml
+LAYOUT_TOP_DOWN()
+title L3 Диаграмма компонентов веб-приложения (web_app)
+' Восстановлено по изображению «Диаграмма компонентов веб-приложения» (media/image2.png и image3.svg в DOCX ЛР4 frontend).
+' ID компонентов web_*_comp назначены при восстановлении: в исходном изображении ID не видны.
+Person(catalog_editor, "Редактор каталога", "Редактирует карточки туристических объектов")
+Person(platform_admin, "Администратор платформы", "Управляет настройками и доступом")
+Person(guest, "Гость без регистрации", "Просматривает публичный каталог и примеры маршрутов")
+Person(traveler, "Путешественник", "Задаёт параметры поездки, выбирает места и просматривает маршрут")
+Container_Boundary(web_app, "Веб-приложение — TypeScript, React, Vite, Nginx") {
+  Component(web_editor_comp, "Компонент кабинета редактора", "React / TypeScript", "Формы редактирования карточек; результаты проверки и публикации")
+  Component(web_admin_comp, "Компонент кабинета администратора", "React / TypeScript", "Интерфейс управления настройками и правами доступа")
+  Component(web_catalog_comp, "Компонент публичного каталога", "React / TypeScript", "Публичный каталог мест, категории, цены, расписания и примеры маршрутов")
+  Component(web_trip_form_comp, "Компонент планирования поездки", "React / TypeScript", "Интересы, бюджет, даты, время, транспорт и выбранные места")
+  Component(web_auth_comp, "Компонент аутентификации", "React / TypeScript", "Экран входа, состояние пользователя и передача токена")
+  Component(web_map_comp, "Компонент карты и маршрута", "React / TypeScript", "Карта, построенный маршрут, точки интереса и параметры перемещения")
+  Component(web_state_comp, "Менеджер состояния", "React State / Context API", "Состояние пользователя, поездки, каталога, маршрута и ошибок")
+  Component(web_api_client_comp, "API-клиент", "TypeScript / Fetch API", "Единая точка взаимодействия веб-компонентов с серверными API")
+}
+Container(route_service, "Сервис маршрутов и каталога", "Python, FastAPI, SQLAlchemy", "Каталог, ограничения, расчёт и сохранение маршрута")
+System_Ext(idp, "Провайдер идентификации", "Подтверждение пользователя, токены и публичные ключи")
+System_Ext(maps_service, "Картографический сервис", "Карты, тайлы, координаты и данные маршрута")
+System_Ext(device_location, "Служба геолокации устройства", "Получение координат устройства через API браузера")
+Rel(catalog_editor, web_editor_comp, "Редактирование карточек", "HTTPS / UI")
+Rel(platform_admin, web_admin_comp, "Управление настройками и доступом", "HTTPS / UI")
+Rel(guest, web_catalog_comp, "Просмотр каталога и примеров маршрутов", "HTTPS / UI")
+Rel(traveler, web_trip_form_comp, "Параметры поездки, интересы и выбранные места", "HTTPS / UI")
+Rel(traveler, web_map_comp, "Просмотр и изменение маршрута", "HTTPS / UI")
+Rel(web_editor_comp, web_state_comp, "Работа с состоянием редактирования", "React State")
+Rel(web_editor_comp, web_api_client_comp, "CRUD-операции с карточками", "TypeScript Call")
+Rel(web_admin_comp, web_state_comp, "Работа с настройками и правами", "React State")
+Rel(web_admin_comp, web_api_client_comp, "Запрос настроек и ролей", "TypeScript Call")
+Rel(web_catalog_comp, web_state_comp, "Получение и обновление состояния каталога", "React State")
+Rel(web_catalog_comp, web_api_client_comp, "Запрос каталога", "TypeScript Call")
+Rel(web_trip_form_comp, web_state_comp, "Запись параметров поездки", "React State")
+Rel(web_trip_form_comp, web_api_client_comp, "Отправка параметров поездки", "TypeScript Call")
+Rel(web_auth_comp, web_state_comp, "Состояние пользователя и токена", "React State")
+Rel(web_auth_comp, web_api_client_comp, "Запрос авторизации", "TypeScript Call")
+Rel(web_map_comp, web_state_comp, "Получение маршрута и состояния карты", "React State")
+Rel(web_map_comp, web_api_client_comp, "Запрос маршрута и статуса построения", "TypeScript Call")
+Rel(web_api_client_comp, route_service, "Параметры поездки, каталог, оценки, маршрут, статусы и ошибки", "HTTPS / REST / JSON")
+Rel(web_auth_comp, idp, "Авторизация и получение токена", "HTTPS / OIDC")
+Rel(web_map_comp, maps_service, "Загрузка картографических тайлов", "HTTPS / Tiles")
+Rel(web_map_comp, device_location, "Получение текущих координат", "Browser Geolocation API")
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../../../vendor/C4_Container.puml
+LAYOUT_TOP_DOWN()
+title L2 Локальное представление ML разработчика
+Person(traveler, "Путешественник", "Планирует поездку и оценивает предложенные места")
+Person(curator, "Редактор каталога", "Проверяет описания, цены и расписания мест")
+Person(ml_engineer, "ML-инженер", "Готовит данные, оценивает и выпускает модель")
+System_Boundary(travel, "Система построения маршрутов путешествия") {
+  Container(web, "Веб-приложение", "TypeScript, React, Vite, Nginx", "Собирает интересы и обратную связь")
+  Container(mobile, "Мобильное приложение", "TypeScript, React Native, Expo", "Собирает предпочтения и оценки мест")
+  Container(api, "Сервис маршрутов и каталога", "Python, FastAPI, SQLAlchemy", "Готовит кандидатов и контекст; проверяет ограничения")
+  Container(recommend, "Сервис рекомендаций", "Python, FastAPI, scikit-learn", "Оценки соответствия мест интересам и объяснения")
+  ContainerDb(db, "Операционная база данных", "PostgreSQL, PostGIS", "Профили, каталог, маршруты, оценки и журнал изменений")
+  Container(training, "Пакетное обучение модели", "Python, pandas, scikit-learn", "Подготовка признаков, оценка качества и выпуск версии модели")
+  ContainerDb(models, "Хранилище моделей и наборов данных", "MinIO, S3 API", "Версии моделей, преобразования признаков и обучающие выборки")
+}
+System_Ext(maps, "Картографический сервис", "Поиск мест, геокодирование, тайлы и время движения")
+System_Ext(weather, "Сервис погоды", "Прогноз по координатам и датам поездки")
+System_Ext(open_data, "Источник открытых туристических данных", "Внешний API описаний и категорий достопримечательностей")
+Rel(traveler, web, "Параметры и выбор мест; маршрут и статусы", "HTTPS / UI")
+Rel(traveler, mobile, "Параметры и оценки; маршрут на смартфоне", "UI на устройстве")
+Rel(curator, web, "Правки карточек; результат публикации", "HTTPS / UI")
+Rel(web, api, "Запросы поездки и каталога; JSON маршрута и ошибки", "HTTPS / REST / JSON")
+Rel(mobile, api, "Параметры и оценки; JSON маршрута и статусы", "HTTPS / REST / JSON")
+Rel(api, db, "Читает каталог; сохраняет маршруты, оценки и аудит", "PostgreSQL wire / TCP / TLS")
+Rel(api, recommend, "Кандидаты, интересы и контекст; оценки мест и причины", "HTTPS / REST / JSON")
+Rel(api, maps, "Точки и транспорт; геометрия пути и время движения", "HTTPS / REST / JSON")
+Rel(api, weather, "Координаты и даты; прогноз для поездки", "HTTPS / REST / JSON")
+Rel(ml_engineer, training, "Запускает обучение и получает метрики", "CLI / запуск пакетного задания")
+Rel(training, db, "Читает каталог и обезличенную обратную связь", "PostgreSQL wire / TCP / TLS")
+Rel(training, open_data, "Запрашивает описания и категории для признаков", "HTTPS / REST / JSON")
+Rel(training, models, "Сохраняет выборку, модель и отчет о качестве", "HTTPS / S3 API")
+Rel(recommend, models, "Загружает одобренную версию модели и признаки", "HTTPS / S3 API")
+SHOW_LEGEND()
+@enduml

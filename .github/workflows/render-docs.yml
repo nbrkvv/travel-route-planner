@@ -23,6 +23,8 @@ jobs:
         run: python -m unittest discover -s src -v
       - name: Validate and render every standalone diagram
         run: python scripts/render_diagrams.py --jar plantuml.jar
+      - name: Validate integrated C4 policy and render Lab5
+        run: python scripts/validate_lab5.py --jar plantuml.jar --render
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -30,4 +32,6 @@ jobs:
           path: |
             diagrams/**/*.png
             diagrams/**/*.svg
+            lab5/**/*.png
+            lab5/**/*.svg
             validation/

@@ -1,0 +1,47 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Container.puml
+!include common.puml
+title L2 — интеграция (proposed)
+Person(traveler, "Путешественник", "Планирует поездку и оценивает предложенные места")
+Person(catalog_editor, "Редактор каталога", "Проверяет описания, цены и расписания мест")
+Person(platform_admin, "Администратор платформы", "Управляет доступом и настройками системы")
+Person(ml_engineer, "ML-инженер", "Готовит данные, оценивает и выпускает модель")
+Person(guest, "Гость без регистрации", "Изучает публичный каталог и примеры маршрутов перед входом")
+System_Ext(maps_service, "Картографический сервис", "Поиск мест, геокодирование, тайлы и время движения")
+System_Ext(weather_service, "Сервис погоды", "Прогноз по координатам и датам поездки")
+System_Ext(idp, "Провайдер идентификации", "Подтверждение пользователя, токены и публичные ключи")
+System_Ext(tourism_data, "Источник открытых туристических данных", "Внешний API описаний и категорий достопримечательностей")
+System_Ext(device_location, "Служба геолокации устройства", "Браузер и ОС предоставляют координаты после разрешения пользователя")
+System_Boundary(travel_system, "Система маршрутов") {
+!include modules/frontend.puml
+!include modules/backend.puml
+!include modules/ml.puml
+}
+Rel(guest, web_app, "Публичный каталог и примеры маршрутов; просмотр без входа", "HTTPS / UI")
+Rel(traveler, web_app, "Параметры и выбор мест; маршрут и статусы", "HTTPS / UI")
+Rel(traveler, mobile_app, "Параметры и оценки; маршрут на смартфоне", "UI на устройстве")
+Rel(catalog_editor, web_app, "Правки карточек; результат публикации", "HTTPS / UI")
+Rel(platform_admin, web_app, "Роли и настройки; журнал действий", "HTTPS / UI")
+Rel(web_app, route_service, "Запросы поездки и каталога; JSON маршрута и ошибки", "HTTPS / REST / JSON")
+Rel(mobile_app, route_service, "Параметры и оценки; JSON маршрута и статусы", "HTTPS / REST / JSON")
+Rel(route_service, auth_service, "Токен доступа; субъект и прикладная роль", "HTTPS / REST / JSON")
+Rel(auth_service, idp, "Код авторизации и запрос JWKS; профиль и ключи", "HTTPS / OIDC / OAuth 2.0")
+Rel(auth_service, database, "Читает и записывает профили и роли", "PostgreSQL wire / TCP / TLS")
+Rel(route_service, database, "Читает каталог; сохраняет маршруты, оценки и аудит", "PostgreSQL wire / TCP / TLS")
+Rel(route_service, recommendation_service, "Кандидаты, интересы и контекст; оценки мест и причины", "HTTPS / REST / JSON")
+Rel(route_service, maps_service, "Точки и транспорт; геометрия пути и время движения", "HTTPS / REST / JSON")
+Rel(route_service, weather_service, "Координаты и даты; прогноз для поездки", "HTTPS / REST / JSON")
+Rel(route_service, tourism_data, "Импортирует карточки мест для проверки редактором", "HTTPS / REST / JSON")
+Rel(web_app, device_location, "Запрашивает координаты с разрешения пользователя", "Browser Geolocation API")
+Rel(mobile_app, device_location, "Запрашивает координаты с разрешения пользователя", "API геолокации ОС")
+Rel(web_app, maps_service, "Получает тайлы для отображения карты", "HTTPS / Tiles")
+Rel(mobile_app, maps_service, "Получает тайлы для отображения карты", "HTTPS / Tiles")
+Rel(ml_engineer, model_training, "Запускает обучение и получает метрики", "CLI / запуск пакетного задания")
+Rel(model_training, database, "Читает каталог и обезличенную обратную связь", "PostgreSQL wire / TCP / TLS")
+Rel(model_training, tourism_data, "Запрашивает описания и категории для признаков", "HTTPS / REST / JSON")
+Rel(model_training, model_storage, "Сохраняет выборку, модель и отчет о качестве", "HTTPS / S3 API")
+Rel(recommendation_service, model_storage, "Загружает одобренную версию модели и признаки", "HTTPS / S3 API")
+SHOW_LEGEND()
+@enduml

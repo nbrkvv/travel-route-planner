@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../../../vendor/C4_Container.puml
+LAYOUT_TOP_DOWN()
+title Динамика frontend — построение маршрута через веб-приложение
+' Основа: листинг А.2 ЛР4 frontend. C4_Dynamic отсутствует в общей библиотеке пакета, поэтому номера шагов указаны в подписях, как в схемах ML.
+' Серверные шаги 4–7 сокращены; полная серверная последовательность — в общей динамической схеме.
+Person(traveler, "Путешественник", "Вошёл через провайдера идентификации")
+System_Ext(device_location, "Служба геолокации устройства", "Координаты после разрешения пользователя")
+System_Boundary(travel_system, "Система построения маршрутов путешествия") {
+  Container(web_app, "Веб-приложение", "TypeScript, React, Vite", "Форма поездки, карта, отображение маршрута")
+  Container(route_service, "Сервис маршрутов и каталога", "Python, FastAPI, SQLAlchemy", "Ограничения, расчёт и сохранение маршрута")
+  Container(auth_service, "Сервис авторизации", "Python, FastAPI, Authlib", "Проверка токенов и ролей")
+  Container(recommendation_service, "Сервис рекомендаций", "Python, FastAPI, scikit-learn", "Оценки мест и объяснения")
+  ContainerDb(database, "Операционная база данных", "PostgreSQL, PostGIS", "Каталог, маршруты, оценки")
+}
+System_Ext(maps_service, "Картографический сервис", "Путь, время движения и тайлы карты")
+Rel(traveler, web_app, "1. Заполняет форму: интересы, бюджет, время, транспорт", "HTTPS / UI")
+Rel(web_app, device_location, "2. getCurrentPosition(): координаты или отказ; таймаут 10 с, при отказе старт вводится вручную", "Browser Geolocation API")
+Rel(web_app, route_service, "3. POST /api/v1/routes: параметры, Bearer, Idempotency-Key; ответ 201 — маршрут и предупреждения", "HTTPS / JSON, 443 через edge")
+Rel(route_service, auth_service, "4. Проверяет токен и право routes:create", "HTTPS / JSON, 8002")
+Rel(route_service, recommendation_service, "5. POST /v1/recommendations: кандидаты и контекст; оценки и причины", "HTTPS / JSON, 8001")
+Rel(route_service, maps_service, "6. Точки и транспорт; время движения и геометрия пути", "HTTPS / REST, 443")
+Rel(route_service, database, "7. Сохраняет маршрут и оценки", "PostgreSQL / TLS, 5432")
+Rel(web_app, maps_service, "8. GET /{z}/{x}/{y}: тайлы подложки карты", "HTTPS / Tiles, 443")
+Rel(web_app, traveler, "9. Показывает маршрут на карте, остановки, время и стоимость", "HTTPS / UI")
+SHOW_LEGEND()
+@enduml

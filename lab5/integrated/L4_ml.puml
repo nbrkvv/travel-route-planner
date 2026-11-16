@@ -1,0 +1,87 @@
+@startuml
+' Laboratory work 3 - C4 L4 (UML Class Diagram), classic UML notation
+' Decomposes rec_model_registry_comp from laboratory work 2.
+title L4. Реестр и загрузчик моделей — UML Class Diagram
+hide empty members
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+top to bottom direction
+ 
+class ModelRegistry {
+  - storage: ModelStorage
+  - loader: ModelLoader
+  - cache: ModelCache
+  + poll_once(): PollStatus
+  + poll_periodically(interval_seconds: float, stop: Event): void
+  + get_active_model(): LinearModel
+  + set_cache_strategy(strategy: CacheEvictionStrategy): void
+}
+ 
+class ModelCache {
+  - budget_bytes: int
+  - entries: dict[str, CachedModel]
+  - active_version: str | None
+  - strategy: CacheEvictionStrategy
+  + reserve_for_update(bytes: int): bool
+  + admit_and_activate(entry: CachedModel): bool
+  + get_active_model(): LinearModel
+  + set_strategy(strategy: CacheEvictionStrategy): void
+}
+ 
+interface CacheEvictionStrategy {
+  + choose_victim(candidates: Sequence[CachedModel]): str
+}
+class LRUEvictionStrategy {
+  + choose_victim(candidates: Sequence[CachedModel]): str
+}
+class PriorityEvictionStrategy {
+  + choose_victim(candidates: Sequence[CachedModel]): str
+}
+class FIFOEvictionStrategy {
+  + choose_victim(candidates: Sequence[CachedModel]): str
+}
+ 
+abstract class ModelStorage {
+  + active_metadata(): ModelMetadata
+  + download(version: str, max_bytes: int): bytes
+}
+class InMemoryMinIOStorage {
+  + online: bool
+  + publish(version: str, weights: Mapping, ...): void
+  + active_metadata(): ModelMetadata
+  + download(version: str, max_bytes: int): bytes
+}
+class ModelLoader {
+  + required_bytes(size_bytes: int): int
+  + load(metadata: ModelMetadata, artifact: bytes): CachedModel
+}
+class CachedModel {
+  + metadata: ModelMetadata
+  + model: LinearModel
+  + reserved_bytes: int
+  + last_access: int
+}
+class ModelMetadata <<DTO>> {
+  + version: str
+  + size_bytes: int
+  + priority: int
+}
+class LinearModel <<model>> {
+  + weights: Mapping[str, float]
+  + bias: float
+  + predict(features: Mapping[str, float]): float
+}
+ 
+ModelRegistry *-- "1" ModelCache : владеет кэшем
+ModelRegistry --> "1" ModelStorage : опрашивает / загружает
+ModelRegistry --> "1" ModelLoader : десериализует
+ModelCache o-- "1" CacheEvictionStrategy : подменяемая стратегия
+ModelCache *-- "0..*" CachedModel : хранит в RAM
+CachedModel *-- "1" ModelMetadata
+CachedModel *-- "1" LinearModel
+LRUEvictionStrategy ..|> CacheEvictionStrategy
+PriorityEvictionStrategy ..|> CacheEvictionStrategy
+FIFOEvictionStrategy ..|> CacheEvictionStrategy
+InMemoryMinIOStorage --|> ModelStorage
+ModelLoader ..> CachedModel : создаёт
+@enduml

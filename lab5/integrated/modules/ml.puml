@@ -1,0 +1,3 @@
+  Container(recommendation_service, "Сервис рекомендаций", "Python, FastAPI, scikit-learn", "Оценки соответствия мест интересам и объяснения")
+  Container(model_training, "Пакетное обучение модели", "Python, pandas, scikit-learn", "Подготовка признаков, оценка качества и выпуск версии модели")
+  ContainerDb(model_storage, "Хранилище моделей и наборов данных", "MinIO, S3 API", "Версии моделей, преобразования признаков и обучающие выборки")

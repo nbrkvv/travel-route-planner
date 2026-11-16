@@ -1,0 +1,39 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../../../vendor/C4_Container.puml
+LAYOUT_TOP_DOWN()
+title L2 Локальное представление фронтенд-разработчика
+' Восстановлено по рисунку 6 ЛР1; ID контейнеров — по contracts/project.json (алиасы web/mobile/api/auth/db/recommend).
+Person(guest, "Гость без регистрации", "Изучает публичный каталог и примеры маршрутов перед входом")
+Person(catalog_editor, "Редактор каталога", "Проверяет описания, цены и расписания мест")
+Person(traveler, "Путешественник", "Планирует поездку и оценивает предложенные места")
+System_Boundary(travel_system, "Система построения маршрутов путешествия") {
+  Container(web_app, "Веб-приложение", "TypeScript, React, Vite, Nginx", "Публичный каталог, формы поездки, карта и кабинет редактора")
+  Container(mobile_app, "Мобильное приложение", "TypeScript, React Native, Expo", "План поездки, карта, стартовая геопозиция и оценки")
+  Container(route_service, "Сервис маршрутов и каталога", "Python, FastAPI, SQLAlchemy", "Публичный каталог и контракт персональной поездки")
+  Container(auth_service, "Сервис авторизации", "Python, FastAPI, Authlib", "Вход через провайдера, проверка токенов и прикладных ролей")
+  Container(recommendation_service, "Сервис рекомендаций", "Python, FastAPI, scikit-learn", "Оценки соответствия мест интересам и объяснения")
+  ContainerDb(database, "Операционная база данных", "PostgreSQL, PostGIS", "Профили, каталог, маршруты, оценки и журнал изменений")
+}
+System_Ext(device_location, "Служба геолокации устройства", "Браузер и ОС предоставляют координаты после разрешения пользователя")
+System_Ext(maps_service, "Картографический сервис", "Поиск мест, геокодирование, тайлы и время движения")
+System_Ext(idp, "Провайдер идентификации", "Подтверждение пользователя, токены и публичные ключи")
+Rel(guest, web_app, "Публичный каталог и примеры маршрутов; просмотр без входа", "HTTPS / UI")
+Rel(catalog_editor, web_app, "Правки карточек; результат публикации", "HTTPS / UI")
+Rel(traveler, web_app, "Параметры и выбор мест; маршрут и статусы", "HTTPS / UI")
+Rel(traveler, mobile_app, "Параметры и оценки; маршрут на смартфоне", "UI на устройстве")
+Rel(web_app, route_service, "Запросы поездки и каталога; JSON маршрута и ошибки", "HTTPS / REST / JSON")
+Rel(mobile_app, route_service, "Параметры и оценки; JSON маршрута и статусы", "HTTPS / REST / JSON")
+Rel(web_app, device_location, "Запрашивает координаты с разрешения пользователя", "Browser Geolocation API")
+Rel(mobile_app, device_location, "Запрашивает координаты с разрешения пользователя", "API геолокации ОС")
+Rel(web_app, maps_service, "Получает тайлы для отображения карты", "HTTPS / Tiles")
+Rel(mobile_app, maps_service, "Получает тайлы для отображения карты", "HTTPS / Tiles")
+Rel(route_service, auth_service, "Токен доступа; субъект и прикладная роль", "HTTPS / REST / JSON")
+Rel(route_service, recommendation_service, "Кандидаты, интересы и контекст; оценки мест и причины", "HTTPS / REST / JSON")
+Rel(route_service, maps_service, "Точки и транспорт; геометрия пути и время движения", "HTTPS / REST / JSON")
+Rel(route_service, database, "Читает каталог; сохраняет маршруты, оценки и аудит", "PostgreSQL wire / TCP / TLS")
+Rel(auth_service, database, "Читает и записывает профили и роли", "PostgreSQL wire / TCP / TLS")
+Rel(auth_service, idp, "Код авторизации и запрос JWKS; профиль и ключи", "HTTPS / OIDC / OAuth 2.0")
+SHOW_LEGEND()
+@enduml

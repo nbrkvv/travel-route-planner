@@ -1,0 +1,2 @@
+  Container(web_app, "Веб-приложение", "TypeScript, React, Vite, Nginx", "Поездки, карта и кабинеты редактора и администратора")
+  Container(mobile_app, "Мобильное приложение", "TypeScript, React Native, Expo", "Параметры поездки, маршрут и оценки мест")

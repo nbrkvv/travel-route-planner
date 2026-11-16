@@ -1,0 +1,52 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Deployment.puml
+LAYOUT_TOP_DOWN()
+title L2 Общее развёртывание команды
+Deployment_Node(browser, "Устройство пользователя", "Браузер / Android / iOS") {
+ Container(web_app, "Веб-приложение", "React / Vite", "SPA в браузере")
+ Container(mobile_app, "Мобильное приложение", "React Native / Expo", "Приложение ОС")
+}
+Deployment_Node(edge_node, "Пограничный узел", "Linux / Nginx") {
+ Container(edge_nginx, "Reverse Proxy и статика", "Nginx :443", "TLS; балансировка backend")
+}
+Deployment_Node(app_a, "Сервер приложений A", "Linux / Docker") {
+ Container(route_a, "Сервис маршрутов A", "FastAPI :8443", "Экземпляр route_service")
+ Container(auth_service, "Сервис авторизации", "FastAPI :8002", "Один экземпляр")
+ Container(recommendation_service, "Сервис рекомендаций", "FastAPI :8001", "Один процесс; RAM-кэш")
+}
+Deployment_Node(app_b, "Сервер приложений B", "Linux / Docker") {
+ Container(route_b, "Сервис маршрутов B", "FastAPI :8443", "Экземпляр route_service")
+}
+Deployment_Node(worker, "ML-узел", "Linux / Docker job") {
+ Container(model_training, "Пакетное обучение модели", "Python / scikit-learn", "Пакетный запуск")
+}
+Deployment_Node(data, "Закрытый сегмент данных", "Private subnet") {
+ Deployment_Node(primary, "Узел PostgreSQL Primary", "Linux") {
+  ContainerDb(database, "Операционная БД", "PostgreSQL / PostGIS :5432", "Чтение и запись")
+ }
+ Deployment_Node(standby, "Узел PostgreSQL Standby", "Linux") {
+  ContainerDb(database_replica, "Резервная БД", "PostgreSQL :5432", "Асинхронная реплика")
+ }
+ Deployment_Node(s3, "Узел MinIO", "Linux") {
+  ContainerDb(model_storage, "Хранилище моделей", "MinIO :9000", "Модели и выборки")
+ }
+}
+Rel(web_app, edge_nginx, "Загрузка SPA и вызовы API", "HTTPS / TLS, 443")
+Rel(mobile_app, edge_nginx, "Вызовы API", "HTTPS / TLS, 443")
+Rel(edge_nginx, route_a, "Балансирует запросы", "HTTPS / TLS, 8443")
+Rel(edge_nginx, route_b, "Балансирует запросы", "HTTPS / TLS, 8443")
+Rel(route_a, auth_service, "Проверяет токен", "HTTPS / TLS, 8002")
+Rel(route_b, auth_service, "Проверяет токен", "HTTPS / TLS, 8002")
+Rel(route_a, recommendation_service, "Запрашивает ранжирование", "HTTPS / TLS, 8001")
+Rel(route_b, recommendation_service, "Запрашивает ранжирование", "HTTPS / TLS, 8001")
+Rel(route_a, database, "Каталог и маршруты", "PostgreSQL / TLS, 5432")
+Rel(route_b, database, "Каталог и маршруты", "PostgreSQL / TLS, 5432")
+Rel(auth_service, database, "Профили и роли", "PostgreSQL / TLS, 5432")
+Rel(database_replica, database, "Запрашивает поток WAL", "PostgreSQL / TLS, 5432")
+Rel(recommendation_service, model_storage, "Проверяет и загружает модель", "HTTPS / S3 / TLS, 9000")
+Rel(model_training, model_storage, "Публикует артефакты", "HTTPS / S3 / TLS, 9000")
+Rel(model_training, database, "Читает обучающие данные", "PostgreSQL / TLS, 5432")
+SHOW_LEGEND()
+@enduml

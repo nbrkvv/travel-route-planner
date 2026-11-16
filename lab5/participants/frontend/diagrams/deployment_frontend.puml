@@ -1,0 +1,42 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../../../vendor/C4_Deployment.puml
+LAYOUT_TOP_DOWN()
+title Развёртывание — фронтенд-сегмент (согласовано с базовой инфраструктурой пакета)
+' Основа: листинг А.3 ЛР4 frontend. Edge→backend: HTTP 8000 заменён на HTTPS/TLS 8443 (NET-01).
+' Один edge и раздача статики с edge — базовый вариант (HA-01, статус proposed); исходный вариант 2×edge + веб-узлы A/B сохранён в originals.
+Deployment_Node(phone, "Смартфон путешественника", "iOS / Android") {
+  Container(mobile_app, "Мобильное приложение", "TypeScript, React Native, Expo", "План поездки, карта, оценки мест")
+}
+Deployment_Node(user_device, "Устройство пользователя", "Windows / macOS / Linux / мобильная ОС") {
+  Deployment_Node(browser, "Веб-браузер", "Chrome / Firefox / Safari") {
+    Container(web_app, "Веб-приложение (SPA в браузере)", "TypeScript, React", "Формы, карта, кабинеты ролей; токен только в памяти страницы")
+  }
+}
+System_Ext(app_stores, "App Store / Google Play", "Каналы доставки сборок мобильного приложения")
+System_Ext(maps_service, "Картографический сервис", "Тайлы подложки карты")
+Deployment_Node(vpc, "Облачная VPC", "Провайдер не утверждён командой") {
+  Deployment_Node(dmz, "Публичная подсеть", "Security group: Internet → 443/tcp") {
+    Deployment_Node(edge_node, "Пограничный узел", "Linux / Docker / Nginx") {
+      Container(edge_nginx, "Reverse Proxy и статика", "Nginx :443, TLS 1.3", "Терминация TLS, раздача бандла Vite, балансировка /api/*, health-check upstream")
+    }
+  }
+  Deployment_Node(app_subnet, "Приватная подсеть приложений", "Security group: edge → 8443/tcp") {
+    Deployment_Node(app_a, "Сервер приложений A", "Linux / Docker") {
+      Container(route_a, "Сервис маршрутов A", "FastAPI :8443 / TLS", "Экземпляр route_service")
+    }
+    Deployment_Node(app_b, "Сервер приложений B", "Linux / Docker") {
+      Container(route_b, "Сервис маршрутов B", "FastAPI :8443 / TLS", "Экземпляр route_service")
+    }
+  }
+}
+Rel(app_stores, mobile_app, "Доставляет сборку и обновления приложения", "HTTPS, 443")
+Rel(web_app, edge_nginx, "Загружает статику и вызывает API", "HTTPS / TLS 1.3, 443")
+Rel(mobile_app, edge_nginx, "Вызывает REST API", "HTTPS / TLS 1.3, 443")
+Rel(edge_nginx, route_a, "Проксирует /api/*, балансирует, исключает нездоровый upstream", "HTTPS / TLS, 8443")
+Rel(edge_nginx, route_b, "Проксирует /api/*, балансирует, исключает нездоровый upstream", "HTTPS / TLS, 8443")
+Rel(web_app, maps_service, "Получает тайлы карты напрямую", "HTTPS / Tiles, 443")
+Rel(mobile_app, maps_service, "Получает тайлы карты напрямую", "HTTPS / Tiles, 443")
+SHOW_LEGEND()
+@enduml

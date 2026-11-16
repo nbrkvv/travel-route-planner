@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../vendor/C4_Context.puml
+LAYOUT_TOP_DOWN()
+title L0 Общее представление команды
+Person(traveler, "Путешественник", "Параметры поездки и рекомендации")
+Person(ml_engineer, "ML-инженер", "Обучение и выпуск модели")
+Enterprise_Boundary(operator, "ИТ-инфраструктура туристической платформы") {
+ System(travel_system, "Система построения маршрутов", "Маршруты и персональные рекомендации")
+ System_Ext(idp, "Провайдер идентификации (IAM)", "Учётные записи и токены")
+ System_Ext(tourism_crm, "CRM поддержки", "Проектная интеграция: обращения туристов")
+}
+System_Ext(payment_gateway, "Платёжный провайдер", "Проектная интеграция: оплата подписки")
+System_Ext(tourism_data, "Туристические открытые данные", "Описания и категории мест")
+Rel(traveler, travel_system, "Параметры и оценки; рекомендации", "HTTPS / JSON, 443")
+Rel(ml_engineer, travel_system, "Запускает обучение и выпуск модели", "CLI / запуск job")
+Rel(travel_system, idp, "Получает токены и ключи", "HTTPS / OIDC, 443")
+Rel(travel_system, tourism_crm, "Передаёт обращения в поддержку (проектно)", "gRPC / TLS, 443")
+Rel(travel_system, payment_gateway, "Создаёт оплату подписки (проектно)", "HTTPS / REST, 443")
+Rel(travel_system, tourism_data, "Получает описания для каталога и признаков", "HTTPS / REST, 443")
+Person(catalog_editor, "Редактор каталога", "Проверяет карточки мест")
+System_Ext(maps_service, "Картографический сервис", "Матрица времени, пути и тайлы")
+System_Ext(weather_service, "Сервис погоды", "Прогноз по координатам и датам")
+System_Ext(device_location, "Геолокация устройства", "API браузера или ОС")
+Rel(catalog_editor, travel_system, "Публикует карточки мест", "HTTPS / JSON, 443")
+Rel(travel_system, maps_service, "Получает пути и тайлы", "HTTPS / REST / Tiles, 443")
+Rel(travel_system, weather_service, "Получает прогноз", "HTTPS / REST, 443")
+Rel(travel_system, device_location, "Запрашивает координаты с согласия", "API браузера / ОС")
+SHOW_LEGEND()
+@enduml

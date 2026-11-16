@@ -1,0 +1,17 @@
+[
+  {
+    "case": "Rel_D(a,b,\"call\",\"HTTPS\")",
+    "rejected": true,
+    "error": "Directional relationship: repository\\validation\\lint_probe.puml"
+  },
+  {
+    "case": "skinparam dpi 100",
+    "rejected": true,
+    "error": "Local skinparam: repository\\validation\\lint_probe.puml"
+  },
+  {
+    "case": "Rel(a,missing,\"call\",\"HTTPS\")",
+    "rejected": true,
+    "error": "Unresolved relationship a->missing: repository\\validation\\lint_probe.puml"
+  }
+]
