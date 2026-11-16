@@ -82,6 +82,7 @@ def main():
                     if not f.with_suffix('.'+fmt).is_file():
                         raise ValueError(f'Missing output: {f}')
         run([sys.executable, '-m', 'unittest', 'discover', '-s', 'src', '-v'])
+        run([sys.executable, '-m', 'unittest', 'discover', '-s', 'lab5/participants/ml/code', '-p', 'test_*.py', '-v'])
         run([sys.executable, 'lab5/participants/ml/code/demo.py'])
         run([sys.executable, 'lab5/participants/frontend/lab3_code/route_optimization.py'])
         report['success'] = True
