@@ -21,8 +21,11 @@
   },
   "git": {
     "repository_url": "https://github.com/nbrkvv/travel-route-planner",
-    "pull_requests": [],
-    "remote_ci_verified": false
+    "pull_requests": [
+      "https://github.com/nbrkvv/travel-route-planner/pull/1"
+    ],
+    "remote_ci_verified": false,
+    "note": "PR1 merged; past direct pushes retained. New fixes use PR; no retrospective reviews claimed."
   },
   "checks": {
     "package_sources_checked": true,
@@ -34,6 +37,9 @@
       "validation/handoff_checks.json"
     ],
     "frontend_client_code_checked": false,
-    "backend_repository_checked": true
-  }
+    "backend_repository_checked": true,
+    "all_repository_validation": "validation/architecture_checks.json",
+    "all_repository_diagrams": 52
+  },
+  "coordination_issue": "https://github.com/nbrkvv/travel-route-planner/issues/2"
 }

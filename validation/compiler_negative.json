@@ -1,0 +1,13 @@
+{
+  "command": [
+    "C:/Program Files/Java/jre1.8.0_503/bin/java.exe",
+    "-jar",
+    "../tools/plantuml.jar",
+    "-failfast2",
+    "-checkonly",
+    "validation\\syntax_failure_probe.puml"
+  ],
+  "exit_code": 200,
+  "stdout": "",
+  "stderr": "Some diagram description contains errors\n"
+}

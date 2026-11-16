@@ -5,6 +5,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -19,11 +20,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y graphviz
           curl -fL https://github.com/plantuml/plantuml/releases/download/v1.2025.2/plantuml-1.2025.2.jar -o plantuml.jar
-      - name: Test domain code
-        run: python -m unittest discover -s src -v
-      - name: Validate and render every standalone diagram
-        run: python scripts/render_diagrams.py --jar plantuml.jar
-      - name: Validate integrated C4 policy and render Lab5
+      - name: Test diagram discovery and failure handling
+        run: python -m unittest discover -s scripts/tests -v
+      - name: Validate and render all repository diagrams
         run: python scripts/validate_lab5.py --jar plantuml.jar --render
       - uses: actions/upload-artifact@v4
         if: always()
@@ -34,4 +33,11 @@ jobs:
             diagrams/**/*.svg
             lab5/**/*.png
             lab5/**/*.svg
+            front_diagramms/**/*.png
+            front_diagramms/**/*.svg
+            front_diagramms/**/*.puml
+            diagrams/**/*.puml
+            lab5/**/*.puml
+            lab5/contracts/project.json
+            README.md
             validation/

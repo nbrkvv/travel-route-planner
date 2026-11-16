@@ -1,7 +1,8 @@
 @startuml
+!pragma layout smetana
 ' ЛР №4, часть 2: динамическая диаграмма сквозного процесса «Построение маршрута».
 !define RELATIVE_INCLUDE
-!include ../vendor/C4-PlantUML/C4_Dynamic.puml
+!include ../vendor/C4_Container.puml
 
 LAYOUT_TOP_DOWN()
 

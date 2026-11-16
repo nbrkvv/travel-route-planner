@@ -1,7 +1,7 @@
 @startuml
 !pragma layout smetana
 !define RELATIVE_INCLUDE
-!include ../vendor/C4-PlantUML/C4_Container.puml
+!include ../vendor/C4_Container.puml
 LAYOUT_TOP_DOWN()
 title L2 Сводное представление команды
 Person(traveler, "Путешественник", "Планирует поездку и оценивает предложенные места")
