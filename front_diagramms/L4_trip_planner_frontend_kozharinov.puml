@@ -1,0 +1,43 @@
+@startuml
+' ЛР №3, C4 L4: компонент Trip Planner.
+' Классическая диаграмма классов UML, паттерн Strategy.
+title Диаграмма классов UML (L4) — Trip Planner
+
+top to bottom direction
+
+class TripPlanner {
+  - _context: TripContext
+  - _strategy: RouteScoringStrategy
+  --
+  + __init__(context: TripContext, strategy: RouteScoringStrategy): None
+  + set_strategy(strategy: RouteScoringStrategy): None
+  + build_trip(criteria: TripCriteria): TripPlan
+}
+
+interface RouteScoringStrategy {
+  + score(plan: TripPlan, criteria: TripCriteria): float
+}
+
+class InterestFirstStrategy {
+  + score(plan: TripPlan, criteria: TripCriteria): float
+}
+
+class ShortestRouteScoringStrategy {
+  + score(plan: TripPlan, criteria: TripCriteria): float
+}
+
+class BalancedRouteScoringStrategy {
+  + score(plan: TripPlan, criteria: TripCriteria): float
+}
+
+TripPlanner "1" *-- "1" RouteScoringStrategy : текущая стратегия
+RouteScoringStrategy <|.. InterestFirstStrategy
+RouteScoringStrategy <|.. ShortestRouteScoringStrategy
+RouteScoringStrategy <|.. BalancedRouteScoringStrategy
+
+note right of TripPlanner
+TripCriteria, TripContext и TripPlan —
+вспомогательные типизированные структуры.
+На схеме выделено ядро паттерна Strategy.
+end note
+@enduml
