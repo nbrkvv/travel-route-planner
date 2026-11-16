@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "ml_tests": 11,
+  "backend_tests": 12,
+  "lab5_diagrams_compiled": 35,
+  "ml_demo_exit_code": 0,
+  "frontend_demo_exit_code": 0,
+  "readme_changed": false,
+  "replica_decision_changed": false,
+  "prototype_code_changed": false,
+  "note": "Local verification only. Remote CI and teammate approval are separate."
+}
