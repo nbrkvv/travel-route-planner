@@ -40,4 +40,11 @@ TripCriteria, TripContext и TripPlan —
 вспомогательные типизированные структуры.
 На схеме выделено ядро паттерна Strategy.
 end note
+
+note bottom of RouteScoringStrategy
+Границы (LR3-01): TripPlanner — индивидуальный прототип ЛР3,
+альтернативный вариант компонента route_service.
+В общей L4 используется RoutePlanner backend; HTTP API
+этим прототипом не реализуется.
+end note
 @enduml
