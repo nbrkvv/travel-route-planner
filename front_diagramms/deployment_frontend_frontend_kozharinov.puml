@@ -1,7 +1,8 @@
 @startuml
+!pragma layout smetana
 ' ЛР №4, часть 3: диаграмма развёртывания (L2), фронтенд-сегмент.
 !define RELATIVE_INCLUDE
-!include ../vendor/C4-PlantUML/C4_Deployment.puml
+!include ../vendor/C4_Deployment.puml
 
 LAYOUT_TOP_DOWN()
 

@@ -1,6 +1,7 @@
 @startuml
 !pragma layout smetana
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!define RELATIVE_INCLUDE
+!include ../vendor/C4_Component.puml
 
 title L3 Декомпозиция контейнера "Сервис рекомендаций"
 

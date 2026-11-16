@@ -348,5 +348,12 @@
     "HA-02": "Propose one auth and one ML process; team confirmation pending",
     "BUS-01": "Propose CRM support and subscription payments; team confirmation pending",
     "AUTH-01": "Auth service exchanges code and validates access; callback/API and PKCE ownership pending"
+  },
+  "team_confirmation": {
+    "status": "awaiting_frontend_and_ml",
+    "issue": "https://github.com/nbrkvv/travel-route-planner/issues/2",
+    "frontend_confirmed": false,
+    "ml_confirmed": false,
+    "note": "Technical include/renderer fixes do not approve semantic contracts; explicit replies required."
   }
 }

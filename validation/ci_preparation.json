@@ -1,0 +1,16 @@
+{
+  "validator_tests": {
+    "command": "python -X utf8 -m unittest discover -s repository/scripts/tests -v",
+    "exit_code": 0,
+    "tests": 7
+  },
+  "full_render": {
+    "log": "architecture_checks.json",
+    "standalone": 52,
+    "fragments": 4,
+    "success": true
+  },
+  "compiler_negative": "compiler_negative.json",
+  "visual_review": "Seven frontend PNGs inspected in frontend_contact.png; semantic conflicts are tracked in issue #2, not approved by successful rendering.",
+  "coordination": "https://github.com/nbrkvv/travel-route-planner/issues/2"
+}
