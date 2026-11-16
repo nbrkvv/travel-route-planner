@@ -4,7 +4,13 @@
   "roles": {
     "ml": {
       "status": "prepared",
-      "reviewed_by_teammates": false
+      "reviewed_by_teammates": false,
+      "backend_review": {
+        "pr": 3,
+        "commit": "a23d76baedd5dd19a9d79826410cd4bcc8f876ca",
+        "status": "changes_requested",
+        "url": "https://github.com/nbrkvv/travel-route-planner/pull/3#pullrequestreview-5918805854"
+      }
     },
     "frontend": {
       "status": "prepared",
@@ -22,10 +28,18 @@
   "git": {
     "repository_url": "https://github.com/nbrkvv/travel-route-planner",
     "pull_requests": [
-      "https://github.com/nbrkvv/travel-route-planner/pull/1"
+      "https://github.com/nbrkvv/travel-route-planner/pull/1",
+      "https://github.com/nbrkvv/travel-route-planner/pull/3",
+      "https://github.com/nbrkvv/travel-route-planner/pull/4"
     ],
-    "remote_ci_verified": false,
-    "note": "PR1 merged; past direct pushes retained. New fixes use PR; no retrospective reviews claimed."
+    "remote_ci_verified": true,
+    "note": "PR1 merged; past direct pushes retained. New fixes use PR; no retrospective reviews claimed.",
+    "latest_verified_ci": {
+      "commit": "fd194a3bec0d1cb617a77a9317842ade2d86dfe2",
+      "run": "https://github.com/nbrkvv/travel-route-planner/actions/runs/43852614697",
+      "conclusion": "success",
+      "artifact_id": 14218146731
+    }
   },
   "checks": {
     "package_sources_checked": true,
