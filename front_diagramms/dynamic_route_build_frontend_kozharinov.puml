@@ -1,0 +1,34 @@
+@startuml
+' ЛР №4, часть 2: динамическая диаграмма сквозного процесса «Построение маршрута».
+!define RELATIVE_INCLUDE
+!include ../vendor/C4-PlantUML/C4_Dynamic.puml
+
+LAYOUT_TOP_DOWN()
+
+title Динамическая диаграмма — построение персонального маршрута через веб-приложение
+
+Person(traveler, "Путешественник", "Планирует поездку")
+System_Ext(device_location, "Служба геолокации устройства", "Координаты после разрешения пользователя")
+
+System_Boundary(travel_system, "Система построения маршрутов путешествия") {
+  Container(web_app, "Веб-приложение", "TypeScript, React, Vite, Nginx", "Формы поездки, карта, отображение маршрута")
+  Container(route_service, "Сервис маршрутов и каталога", "Python, FastAPI, SQLAlchemy", "Ограничения, расчёт и сохранение маршрута")
+  Container(auth_service, "Сервис авторизации", "Python, FastAPI, Authlib", "Проверка токенов и ролей")
+  Container(recommendation_service, "Сервис рекомендаций", "Python, FastAPI, scikit-learn", "Оценки мест и объяснения")
+  ContainerDb(database, "Операционная база данных", "PostgreSQL, PostGIS", "Каталог, маршруты, оценки")
+}
+
+System_Ext(maps_service, "Картографический сервис", "Путь, время движения и тайлы карты")
+
+Rel(traveler, web_app, "Заполняет форму: интересы, бюджет, время, транспорт", "HTTPS / UI")
+Rel(web_app, device_location, "getCurrentPosition(): запрашивает стартовые координаты", "Browser Geolocation API")
+Rel(web_app, route_service, "POST /api/v1/trips: параметры поездки и токен; в ответ — 201 Created и JSON маршрута", "HTTPS / REST / JSON")
+Rel(route_service, auth_service, "POST /v1/tokens/verify: токен; субъект и роль", "HTTPS / REST / JSON")
+Rel(route_service, recommendation_service, "POST /v1/recommendations: кандидаты и контекст; оценки и причины", "HTTPS / REST / JSON")
+Rel(route_service, maps_service, "Точки и транспорт; геометрия пути и время движения", "HTTPS / REST / JSON")
+Rel(route_service, database, "INSERT маршрута и оценок", "PostgreSQL wire / TCP / TLS")
+Rel(web_app, maps_service, "GET /{z}/{x}/{y}: тайлы подложки карты", "HTTPS / Tiles")
+Rel(web_app, traveler, "Показывает маршрут на карте и список остановок", "HTTPS / UI")
+
+SHOW_LEGEND()
+@enduml
