@@ -2,6 +2,7 @@
 !pragma layout smetana
 !define RELATIVE_INCLUDE
 !include ../../../../vendor/C4_Container.puml
+!assert C4Version() == "2.12.0" : "Требуется C4-PlantUML 2.12.0 из vendor"
 LAYOUT_TOP_DOWN()
 title L2 Локальное представление фронтенд-разработчика
 ' Восстановлено по рисунку 6 ЛР1; ID контейнеров — по contracts/project.json (алиасы web/mobile/api/auth/db/recommend).
