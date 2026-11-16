@@ -240,7 +240,7 @@
         "status": "proposed; распределение ролей web_auth_comp и auth_service — AUTH-01"
       }
     ],
-    "dto_draft": "participants/frontend/CLIENT_CONTRACT_DRAFT.md (proposed, не подтверждено реализацией)"
+    "dto_draft": "README.md#document-9 (proposed, не подтверждено реализацией)"
   },
   "frontend_components": {
     "container": "web_app",
