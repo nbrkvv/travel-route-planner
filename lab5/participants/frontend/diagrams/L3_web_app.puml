@@ -2,6 +2,7 @@
 !pragma layout smetana
 !define RELATIVE_INCLUDE
 !include ../../../../vendor/C4_Component.puml
+!assert C4Version() == "2.12.0" : "Требуется C4-PlantUML 2.12.0 из vendor"
 LAYOUT_TOP_DOWN()
 title L3 Диаграмма компонентов веб-приложения (web_app)
 ' Восстановлено по изображению «Диаграмма компонентов веб-приложения» (media/image2.png и image3.svg в DOCX ЛР4 frontend).
@@ -41,9 +42,9 @@ Rel(web_auth_comp, web_state_comp, "Состояние пользователя 
 Rel(web_auth_comp, web_api_client_comp, "Запрос авторизации", "TypeScript Call")
 Rel(web_map_comp, web_state_comp, "Получение маршрута и состояния карты", "React State")
 Rel(web_map_comp, web_api_client_comp, "Запрос маршрута и статуса построения", "TypeScript Call")
-Rel(web_api_client_comp, route_service, "Параметры поездки, каталог, оценки, маршрут, статусы и ошибки", "HTTPS / REST / JSON")
-Rel(web_auth_comp, idp, "Авторизация и получение токена", "HTTPS / OIDC")
-Rel(web_map_comp, maps_service, "Загрузка картографических тайлов", "HTTPS / Tiles")
+Rel(web_api_client_comp, route_service, "POST /api/v1/routes и запросы каталога; RouteDTO, статусы и ошибки", "HTTPS / REST / JSON, 443 через edge")
+Rel(web_auth_comp, idp, "Редирект на вход (Authorization Code + PKCE); обмен кода выполняет auth_service", "HTTPS / OIDC, 443")
+Rel(web_map_comp, maps_service, "Загрузка картографических тайлов", "HTTPS / Tiles, 443")
 Rel(web_map_comp, device_location, "Получение текущих координат", "Browser Geolocation API")
 SHOW_LEGEND()
 @enduml

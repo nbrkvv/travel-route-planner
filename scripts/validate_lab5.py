@@ -111,7 +111,6 @@ def main():
         run([sys.executable, '-m', 'unittest', 'discover', '-s', 'src', '-v'])
         run([sys.executable, 'lab5/participants/ml/code/demo.py'])
         run([sys.executable, 'lab5/participants/frontend/lab3_code/route_optimization.py'])
-        run([sys.executable, 'front_diagramms/route_optimization_frontend_kozharinov.py'])
         report['success'] = True
     except Exception as e:
         report['error'] = str(e)

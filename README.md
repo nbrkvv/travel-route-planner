@@ -313,7 +313,7 @@ L3 каждого контейнера — отдельный вид, чтобы
 
 ### Материалы участника — frontend
 
-**Участник и роль:** Кожаринов Матвей — frontend-разработчик (web_app, mobile_app). Матвей ещё не подтвердил предложенные изменения (см. «Оставшиеся вопросы»).
+**Участник и роль:** Кожаринов Матвей — frontend-разработчик (web_app, mobile_app). Решения API-01, NET-01, HA-01, BUS-01, AUTH-01, CLOUD-01, ID-01, LR2-01 и LR3-01 подтверждены frontend в issue №2 и собственном PR (см. «Решения frontend, ЛР5»). DTO-01 и SRC-01 остаются открытыми.
 
 **Версия входных исходников / коммит:** коммитов нет. Вход — DOCX ЛР1–ЛР4, приложенные Матвеем 15.11.2026 (хэши в PROVENANCE.md). Код клиента и репозиторий не предоставлены.
 
@@ -332,12 +332,20 @@ L3 каждого контейнера — отдельный вид, чтобы
 |---|---|---|---|---|
 | API-01 | POST /api/v1/trips | POST /api/v1/routes | отчёт ЛР4 backend, базовый пакет | aligned-draft |
 | NET-01 | edge → route_service HTTP/JSON :8000 | HTTPS/TLS :8443 | ЛР4 backend п.4, базовая схема 06 | aligned-draft |
-| HA-01 | 2 edge (VRRP) + веб-узлы A/B :8080 | 1 edge Nginx :443 со статикой; 2 реплики route_service | базовая схема 06, ЛР4 backend п.5 | proposed |
-| BUS-01 | CRM: профили, согласия, льготы; оплата билетов/экскурсий | CRM поддержки; оплата подписки (проектно) | ЛР4 backend, ЛР4 ML | proposed |
-| AUTH-01 | POST /v1/tokens/verify | endpoint не указывается | contracts: auth endpoint не утверждён | proposed |
+| HA-01 | 2 edge (VRRP) + веб-узлы A/B :8080 | 1 edge Nginx :443 со статикой; 2 реплики route_service | базовая схема 06, ЛР4 backend п.5 | confirmed (frontend) |
+| BUS-01 | CRM: профили, согласия, льготы; оплата билетов/экскурсий | CRM поддержки; оплата подписки (проектно) | ЛР4 backend, ЛР4 ML | confirmed (frontend) |
+| AUTH-01 | POST /v1/tokens/verify | редирект с PKCE в браузере; обмен кода и проверка токена — auth_service; endpoint определяет backend | contracts: auth endpoint не утверждён | confirmed (frontend), endpoint — backend |
 | LIB-01 | include C4_Dynamic.puml | C4_Container, номера в подписях | C4_Dynamic нет в lab4/vendor | resolved-in-package |
-| ID-01 | web_spa, web/mobile/api | web_app, mobile_app, route_service | contracts.containers | proposed |
-| CLOUD-01 | Yandex Cloud | провайдер не утверждён | нет в базовых схемах | proposed |
+| ID-01 | web_spa, web/mobile/api | web_app, mobile_app, route_service | contracts.containers | confirmed (frontend) |
+| CLOUD-01 | Yandex Cloud | провайдер не утверждён | нет в базовых схемах | confirmed (frontend) |
+
+#### Решения frontend, ЛР5
+
+- **Актуальные версии.** Актуальные схемы frontend находятся только в `lab5/participants/frontend/diagrams`. Каталог `front_diagramms` (листинги ЛР1–ЛР4 от 16.11.2026) удалён как дубликат: L0 и deployment — устаревшие версии L0_frontend и deployment_frontend; dynamic_route_build заменён dynamic_frontend; L1_integrated и L2_INTEGRATED заменены общими `lab5/integrated/L1.puml` и `L2.puml`; L3_recommendation_service — копия ЛР2 ML (`integrated/L3_ml.puml`); L4_trip_planner и прототип совпадали с `diagrams/L4_trip_planner.puml` и `lab3_code/route_optimization.py`. Исходные версии остаются в истории git (коммиты 64d2e2f…c866a7d).
+- **Библиотека.** Все C4-схемы frontend подключают локальную `vendor` C4-PlantUML 2.12.0, используют Smetana и проверяют версию строкой `!assert C4Version() == "2.12.0"`. L4_trip_planner — UML-диаграмма классов без C4.
+- **Сеть и API.** Клиенты обращаются только к edge по HTTPS 443; один edge Nginx раздаёт статику и балансирует две реплики route_service по HTTPS/TLS 8443; auth 8002 и ML 8001 — внутренние порты backend. Маршрут создаётся через POST /api/v1/routes. В L3_web_app вызовы API, IdP и тайлов подписаны портами, вход — Authorization Code + PKCE, обмен кода выполняет auth_service.
+- **Границы.** Собственная L3 — L3_web_app; ЛР2 показывается ссылкой на общую L3 ML. TripPlanner — альтернативный прототип route_service; в общей L4 используется RoutePlanner backend (пометка добавлена в L4_trip_planner).
+- **Открыто.** DTO-01 — поля запроса и ответа до OpenAPI backend; SRC-01 — кода web_app/mobile_app в репозитории нет.
 
 Подтверждённые документами (но не кодом) вызовы клиента — contracts/project.json → frontend_client_calls: getCurrentPosition() с таймаутом 10 с; GET /{z}/{x}/{y} к картам напрямую; POST /api/v1/routes через edge с Bearer и Idempotency-Key, таймаут 15 с; реакции на 401/422/таймаут/5xx. Поля DTO — только черновик (CLIENT_CONTRACT_DRAFT.md).
 
@@ -350,7 +358,7 @@ L3 каждого контейнера — отдельный вид, чтобы
 
 **Компиляция и просмотр изображений:** все семь PNG просмотрены визуально: текст читается, связи и подписи соответствуют исходникам. В L2_frontend и dynamic_frontend отдельные линии проходят через подписи и границу системы, но текст остаётся читаемым; раскладку не правил, так как Rel_* и skinparam запрещены. Компиляция не проверяет работу API, TLS и балансировки — это проектная конфигурация. Word на этапе frontend не создавался.
 
-**Реальные ссылки PR/review/CI:** нет. Ветки, коммиты, PR и запуски Actions на этом этапе не создавались. Репозиторий https://github.com/nbrkvv/travel-route-planner из среды обработки открыть не удалось — его содержимое не проверено.
+**Реальные ссылки PR/review/CI:** на этапе пакета — нет. В ЛР5 исправления frontend переданы собственным PR из ветки `frontend/lab5-cleanup`; ссылки на PR и сборку — в issue №2.
 
 **Оставшиеся вопросы:** SRC-01 (нужен код клиента или ссылка на репозиторий), LR2-01, LR3-01 (нужна ЛР2 с декомпозицией Trip Planning Service, если есть), подтверждение Матвеем HA-01 и BUS-01, AUTH-01, ERR-01, DTO-01 — см. coordination/OPEN_ISSUES.md.
 

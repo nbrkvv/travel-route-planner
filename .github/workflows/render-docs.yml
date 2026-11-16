@@ -33,9 +33,6 @@ jobs:
             diagrams/**/*.svg
             lab5/**/*.png
             lab5/**/*.svg
-            front_diagramms/**/*.png
-            front_diagramms/**/*.svg
-            front_diagramms/**/*.puml
             diagrams/**/*.puml
             lab5/**/*.puml
             lab5/contracts/project.json

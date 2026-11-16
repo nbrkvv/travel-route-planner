@@ -2,6 +2,7 @@
 !pragma layout smetana
 !define RELATIVE_INCLUDE
 !include ../../../../vendor/C4_Context.puml
+!assert C4Version() == "2.12.0" : "Требуется C4-PlantUML 2.12.0 из vendor"
 LAYOUT_TOP_DOWN()
 title L1 Локальное представление фронтенд-разработчика
 ' Восстановлено по рисунку 2 ЛР1 (исходник .puml в материалах отсутствует); ID приведены к глоссарию ЛР1.
