@@ -1,0 +1,54 @@
+@startuml
+' ЛР №4, часть 3: диаграмма развёртывания (L2), фронтенд-сегмент.
+!define RELATIVE_INCLUDE
+!include ../vendor/C4-PlantUML/C4_Deployment.puml
+
+LAYOUT_TOP_DOWN()
+
+title Диаграмма развёртывания — фронтенд-сегмент системы маршрутов путешествия
+
+Deployment_Node(phone, "Смартфон путешественника", "iOS / Android") {
+  Container(mobile_app, "Мобильное приложение", "TypeScript, React Native, Expo", "План поездки, карта, оценки мест")
+}
+
+Deployment_Node(user_device, "Устройство пользователя", "Windows / macOS / Linux / мобильная ОС") {
+  Deployment_Node(browser, "Веб-браузер", "Chrome / Firefox / Safari") {
+    Container(web_spa, "Веб-приложение (SPA в браузере)", "TypeScript, React", "Формы, карта, кабинеты ролей")
+  }
+}
+
+System_Ext(app_stores, "App Store / Google Play", "Каналы доставки сборок мобильного приложения")
+System_Ext(maps_service, "Картографический сервис", "Тайлы подложки карты")
+
+Deployment_Node(cloud, "Облачная инфраструктура", "Yandex Cloud, VPC") {
+  Deployment_Node(dmz, "Публичная подсеть (DMZ)", "Security group: Internet → 443/tcp") {
+    Deployment_Node(edge, "Edge-узлы ×2 (A/B, VRRP)", "Ubuntu 22.04 VM, Docker") {
+      Container(edge_nginx, "Nginx Reverse Proxy", "Nginx, TLS 1.3", "Терминация TLS, балансировка, проксирование /api")
+    }
+  }
+  Deployment_Node(web_subnet, "Приватная подсеть: веб-узлы", "Security group: edge → 8080/tcp") {
+    Deployment_Node(web_node_a, "Веб-узел A", "Ubuntu 22.04 VM, Docker, зона A") {
+      Container(web_app_a, "Веб-приложение (статика)", "Nginx, React / Vite build", "Раздача SPA")
+    }
+    Deployment_Node(web_node_b, "Веб-узел B", "Ubuntu 22.04 VM, Docker, зона B") {
+      Container(web_app_b, "Веб-приложение (статика)", "Nginx, React / Vite build", "Раздача SPA")
+    }
+  }
+  Deployment_Node(app_subnet, "Приватная подсеть: прикладные узлы", "Security group: edge → 8000/tcp") {
+    Deployment_Node(app_node, "Прикладной узел", "Ubuntu 22.04 VM, Docker") {
+      Container(route_service, "Сервис маршрутов и каталога", "Python, FastAPI, SQLAlchemy", "REST API для клиентов")
+    }
+  }
+}
+
+Rel(app_stores, mobile_app, "Доставляет сборку и обновления приложения", "HTTPS, порт 443")
+Rel(web_spa, edge_nginx, "Загружает статику и вызывает API", "HTTPS / TLS 1.3, порт 443")
+Rel(mobile_app, edge_nginx, "Вызывает REST API", "HTTPS / TLS 1.3, порт 443")
+Rel(edge_nginx, web_app_a, "Проксирует запросы статики (round-robin)", "HTTP, порт 8080")
+Rel(edge_nginx, web_app_b, "Проксирует запросы статики (round-robin)", "HTTP, порт 8080")
+Rel(edge_nginx, route_service, "Проксирует запросы /api/*", "HTTP / JSON, порт 8000")
+Rel(web_spa, maps_service, "Получает тайлы карты", "HTTPS / Tiles, порт 443")
+Rel(mobile_app, maps_service, "Получает тайлы карты", "HTTPS / Tiles, порт 443")
+
+SHOW_LEGEND()
+@enduml
