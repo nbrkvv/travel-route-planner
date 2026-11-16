@@ -325,10 +325,12 @@
     "component": "Trip Planner в route_service (алиас Trip Planning Service)",
     "signature": "TripPlanner.build_trip(criteria: TripCriteria) -> TripPlan",
     "backend_counterpart": "RoutePlanner.plan(candidates, preferences, matrix) -> RoutePlan (ЛР3 backend)",
-    "status": "proposed; см. LR3-01"
+    "status": "confirmed by frontend: alternative prototype of route_service; integrated L4 = backend RoutePlanner"
   },
   "frontend_lab2": {
-    "status": "совпадает с ЛР2 ML (L3 recommendation_service)",
+    "status": "ЛР2 frontend совпадает с ЛР2 ML; отдельная копия front_diagramms/L3_recommendation_service удалена",
+    "own_l3": "participants/frontend/diagrams/L3_web_app.puml",
+    "lab2_reference": "integrated/L3_ml.puml",
     "see": "LR2-01"
   },
   "implementation_evidence": {
@@ -350,10 +352,25 @@
     "AUTH-01": "Auth service exchanges code and validates access; callback/API and PKCE ownership pending"
   },
   "team_confirmation": {
-    "status": "awaiting_frontend_and_ml",
+    "status": "awaiting_ml",
     "issue": "https://github.com/nbrkvv/travel-route-planner/issues/2",
-    "frontend_confirmed": false,
+    "frontend_confirmed": true,
     "ml_confirmed": false,
     "note": "Technical include/renderer fixes do not approve semantic contracts; explicit replies required."
+  },
+  "frontend_confirmation": {
+    "by": "Кожаринов Матвей (frontend)",
+    "issue": "https://github.com/nbrkvv/travel-route-planner/issues/2",
+    "API-01": "confirmed: POST /api/v1/routes вместо /api/v1/trips (проектный контракт, HTTP API не реализован)",
+    "NET-01": "confirmed: клиент → edge HTTPS 443; edge → route_service HTTPS/TLS 8443; auth 8002 и ML 8001 — внутренние",
+    "HA-01": "confirmed: один edge Nginx 443 раздаёт статику и балансирует две реплики route_service; варианты 2×edge/VRRP и веб-узлы :8080 отклонены; edge — единая точка отказа",
+    "BUS-01": "confirmed: CRM поддержки и оплата подписки, обе интеграции проектные",
+    "AUTH-01": "confirmed for frontend: браузер выполняет front-channel редирект на IdP (Authorization Code + PKCE), обмен кода и проверку токена выполняет auth_service; endpoint /v1/tokens/verify не используется, конкретный endpoint определяет backend",
+    "CLOUD-01": "confirmed: провайдер облака не фиксируется",
+    "ID-01": "confirmed: web_app, mobile_app, route_service",
+    "LR2-01": "confirmed: собственная L3 — L3_web_app; ЛР2 показывается ссылкой на общую L3 ML",
+    "LR3-01": "confirmed: TripPlanner — альтернативный прототип route_service, в integrated L4 — RoutePlanner backend",
+    "DTO-01": "pending: поля CLIENT_CONTRACT_DRAFT.md остаются proposed до OpenAPI backend",
+    "SRC-01": "pending: исходный код web_app/mobile_app в репозитории отсутствует"
   }
 }
