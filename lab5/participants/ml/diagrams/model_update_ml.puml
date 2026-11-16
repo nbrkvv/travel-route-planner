@@ -1,0 +1,22 @@
+@startuml
+!pragma layout smetana
+!define RELATIVE_INCLUDE
+!include ../../../../vendor/C4_Component.puml
+LAYOUT_TOP_DOWN()
+title Динамика ML — обновление и отказ хранилища
+Container(route_service, "Сервис маршрутов и каталога", "Python / FastAPI", "Кандидаты и контекст поездки")
+ContainerDb(model_storage, "Хранилище моделей", "MinIO / S3 API", "Одобренная модель и метаданные")
+Container_Boundary(recommendation_service, "Сервис рекомендаций — один процесс Python") {
+ Component(rec_api_comp, "API-контроллеры рекомендаций", "FastAPI / Pydantic", "Проверка DTO и координация")
+ Component(rec_inference_comp, "Движок ML-инференса", "Python / scikit-learn", "Признаки и оценки кандидатов")
+ Component(rec_model_registry_comp, "Реестр и загрузчик моделей", "Python / boto3", "Активная модель и метаданные в RAM")
+}
+
+Rel(rec_model_registry_comp, model_storage, "1. Запрашивает метаданные active_metadata()", "HTTPS / S3, 9000")
+Rel(rec_model_registry_comp, model_storage, "2. После резерва RAM скачивает новую версию", "HTTPS / S3, 9000")
+Rel(rec_model_registry_comp, model_storage, "3. Следующий опрос: тайм-аут, OFFLINE_CACHED", "HTTPS / S3, 9000")
+Rel(route_service, rec_api_comp, "4. После сбоя MinIO передаёт запрос", "HTTPS / JSON, 8001")
+Rel(rec_api_comp, rec_inference_comp, "5. Запускает скоринг", "Python Call")
+Rel(rec_inference_comp, rec_model_registry_comp, "6. Получает сохранённую активную модель", "Python Call")
+SHOW_LEGEND()
+@enduml

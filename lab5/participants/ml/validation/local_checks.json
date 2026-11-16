@@ -1,0 +1,40 @@
+{
+  "success": true,
+  "standalone_diagrams": 35,
+  "plantuml": "1.2025.2",
+  "c4_plantuml": "2.12.0",
+  "c4_layout": "smetana",
+  "png_dpi": 180,
+  "checks": [
+    {
+      "command": "PlantUML compilation/version",
+      "exit_code": 0
+    },
+    {
+      "command": "PlantUML compilation/version",
+      "exit_code": 0
+    },
+    {
+      "command": "PlantUML compilation/version",
+      "exit_code": 0
+    },
+    {
+      "command": "PlantUML compilation/version",
+      "exit_code": 0
+    },
+    {
+      "command": "-m unittest discover -s src -v",
+      "exit_code": 0
+    },
+    {
+      "command": "demo.py",
+      "exit_code": 0
+    },
+    {
+      "command": "route_optimization.py",
+      "exit_code": 0
+    }
+  ],
+  "remote_ci_verified": false,
+  "note": "Local compilation/test results; teammate review and remote CI are separate."
+}
